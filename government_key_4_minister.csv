@@ -1,0 +1,298 @@
+country_name_short,country_name,election_date,start_date,cabinet_name,gov_RILE,gov_per501,left_dummy,green_party,development_minister,lagged_year,start_year
+AUS,Australia,21/08/2010,14/09/2010,Gillard II,-16.37424,4.02336,1,0,Australian Labor Party,2012,2011
+AUS,Australia,21/08/2010,14/09/2010,Gillard II,-16.37424,4.02336,1,0,Australian Labor Party,2013,2012
+AUS,Australia,07/09/2013,18/09/2013,Abbott,12.16878,1.68558,0,0,Liberal Party of Australia,2014,2013
+AUS,Australia,07/09/2013,18/09/2013,Abbott,12.16878,1.68558,0,0,Liberal Party of Australia,2015,2014
+AUS,Australia,07/09/2013,15/09/2015,Turnbull I,12.16878,1.68558,0,0,Liberal Party of Australia,2016,2015
+AUS,Australia,02/07/2016,19/07/2016,Turnbull II,5.052266667,3.69368,0,0,Liberal Party of Australia,2017,2016
+AUS,Australia,02/07/2016,19/07/2016,Turnbull II,5.052266667,3.69368,0,0,Liberal Party of Australia,2018,2017
+AUS,Australia,02/07/2016,24/08/2018,Morrison I,5.052266667,3.69368,0,0,Liberal Party of Australia,2019,2018
+AUS,Australia,18/05/2019,29/05/2019,Morrison II,NA,NA,NA,0,Liberal Party of Australia,2020,2019
+AUT,Austria,28/09/2008,02/12/2008,Faymann I,-5.886622951,1.431606557,1,0,Österreichische Volkspartei,2012,2011
+AUT,Austria,28/09/2008,02/12/2008,Faymann I,-5.886622951,1.431606557,1,0,Österreichische Volkspartei,2013,2012
+AUT,Austria,29/09/2013,16/12/2013,Faymann II,-12.34968306,1.354284153,1,0,Österreichische Volkspartei,2014,2013
+AUT,Austria,29/09/2013,16/12/2013,Faymann II,-12.34968306,1.354284153,1,0,Österreichische Volkspartei,2015,2014
+AUT,Austria,29/09/2013,16/12/2013,Faymann II,-12.34968306,1.354284153,1,0,Österreichische Volkspartei,2016,2015
+AUT,Austria,29/09/2013,17/05/2016,Kern,-12.34968306,1.354284153,1,0,Österreichische Volkspartei,2017,2016
+AUT,Austria,15/10/2017,18/12/2017,Kurz I,6.032098361,2.367612022,0,0,Independent,2018,2017
+AUT,Austria,15/10/2017,18/12/2017,Kurz I,6.032098361,2.367612022,0,0,Independent,2019,2018
+AUT,Austria,29/09/2019,29/09/2019,Bierlein II,0,0,NA,0,Österreichische Volkspartei,2020,2019
+BEL,Belgium,13/06/2010,06/12/2011,Di Rupo,-5.28764,1.057613333,1,0,Parti Socialiste,2012,2011
+BEL,Belgium,13/06/2010,06/12/2011,Di Rupo,-5.28764,1.057613333,1,0,Parti Socialiste,2013,2012
+BEL,Belgium,13/06/2010,06/12/2011,Di Rupo,-5.28764,1.057613333,1,0,Parti Socialiste,2014,2013
+BEL,Belgium,25/05/2014,11/10/2014,Michel I,0.821133333,1.612426667,0,0,Partij voor Vrijheid en Vooruitgang | Vlaamse Liberalen en Democraten,2015,2014
+BEL,Belgium,25/05/2014,11/10/2014,Michel I,0.821133333,1.612426667,0,0,Partij voor Vrijheid en Vooruitgang | Vlaamse Liberalen en Democraten,2016,2015
+BEL,Belgium,25/05/2014,11/10/2014,Michel I,0.821133333,1.612426667,0,0,Partij voor Vrijheid en Vooruitgang | Vlaamse Liberalen en Democraten,2017,2016
+BEL,Belgium,25/05/2014,11/10/2014,Michel I,0.821133333,1.612426667,0,0,Partij voor Vrijheid en Vooruitgang | Vlaamse Liberalen en Democraten,2018,2017
+BEL,Belgium,25/05/2014,09/12/2018,Michel II,-1.067346667,1.064626667,1,0,Partij voor Vrijheid en Vooruitgang | Vlaamse Liberalen en Democraten,2019,2018
+BEL,Belgium,26/05/2019,27/10/2019,Wilmes I,-2.338906667,0.864213333,1,0,Partij voor Vrijheid en Vooruitgang | Vlaamse Liberalen en Democraten,2020,2019
+CAN,Canada,02/05/2011,02/05/2011,Harper III,14.15581169,2.900688312,0,0,Conservative Party of Canada,2012,2011
+CAN,Canada,02/05/2011,02/05/2011,Harper III,14.15581169,2.900688312,0,0,Conservative Party of Canada,2013,2012
+CAN,Canada,02/05/2011,02/05/2011,Harper III,14.15581169,2.900688312,0,0,Conservative Party of Canada,2014,2013
+CAN,Canada,02/05/2011,02/05/2011,Harper III,14.15581169,2.900688312,0,0,Conservative Party of Canada,2015,2014
+CAN,Canada,19/10/2015,04/11/2015,Trudeau J I,-11.25938462,4.841159763,1,0,Liberal Party of Canada,2016,2015
+CAN,Canada,19/10/2015,04/11/2015,Trudeau J I,-11.25938462,4.841159763,1,0,Liberal Party of Canada,2017,2016
+CAN,Canada,19/10/2015,04/11/2015,Trudeau J I,-11.25938462,4.841159763,1,0,Liberal Party of Canada,2018,2017
+CAN,Canada,19/10/2015,04/11/2015,Trudeau J I,-11.25938462,4.841159763,1,0,Liberal Party of Canada,2019,2018
+CAN,Canada,21/10/2019,21/10/2019,Trudeau J II,NA,NA,NA,0,Liberal Party of Canada,2020,2019
+CHE,Switzerland,23/10/2011,14/12/2011,Bundesrat 2011,-9.905755,4.75881,1,0,Freisinnig-Demokratische Partei der Schweiz – Parti Radical-Democratique Suisse,2012,2011
+CHE,Switzerland,23/10/2011,14/12/2011,Bundesrat 2011,-9.905755,4.75881,1,0,Freisinnig-Demokratische Partei der Schweiz – Parti Radical-Democratique Suisse,2013,2012
+CHE,Switzerland,23/10/2011,14/12/2011,Bundesrat 2011,-9.905755,4.75881,1,0,Freisinnig-Demokratische Partei der Schweiz – Parti Radical-Democratique Suisse,2014,2013
+CHE,Switzerland,23/10/2011,14/12/2011,Bundesrat 2011,-9.905755,4.75881,1,0,Freisinnig-Demokratische Partei der Schweiz – Parti Radical-Democratique Suisse,2015,2014
+CHE,Switzerland,18/10/2015,09/12/2015,Bundesrat 2015,2.445195,2.758395,0,0,Freisinnig-Demokratische Partei der Schweiz – Parti Radical-Democratique Suisse,2016,2015
+CHE,Switzerland,18/10/2015,09/12/2015,Bundesrat 2015,2.445195,2.758395,0,0,Freisinnig-Demokratische Partei der Schweiz – Parti Radical-Democratique Suisse,2017,2016
+CHE,Switzerland,18/10/2015,09/12/2015,Bundesrat 2015,2.445195,2.758395,0,0,Freisinnig-Demokratische Partei der Schweiz – Parti Radical-Democratique Suisse,2018,2017
+CHE,Switzerland,18/10/2015,09/12/2015,Bundesrat 2015,2.445195,2.758395,0,0,Freisinnig-Demokratische Partei der Schweiz – Parti Radical-Democratique Suisse,2019,2018
+CHE,Switzerland,20/10/2019,11/12/2019,Bundesrat 2019,3.587685,5.770285,0,0,Freisinnig-Demokratische Partei der Schweiz – Parti Radical-Democratique Suisse,2020,2019
+CZE,Czech Republic,29/05/2010,28/06/2010,Necas I,4.54182,3.25146,0,0,Tradice Odpov?dnost Prosperita 09,2012,2011
+CZE,Czech Republic,29/05/2010,27/04/2012,Necas II,4.41947,2.81013,0,0,Tradice Odpov?dnost Prosperita 09,2013,2012
+CZE,Czech Republic,29/05/2010,10/07/2013,Rusnok,0,0,NA,0,Independent,2014,2013
+CZE,Czech Republic,25/10/2013,17/01/2014,Sobotka,-10.520605,5.360585,1,0,?eská strana sociáln? demokratická,2015,2014
+CZE,Czech Republic,25/10/2013,17/01/2014,Sobotka,-10.520605,5.360585,1,0,?eská strana sociáln? demokratická,2016,2015
+CZE,Czech Republic,25/10/2013,17/01/2014,Sobotka,-10.520605,5.360585,1,0,?eská strana sociáln? demokratická,2017,2016
+CZE,Czech Republic,21/10/2017,13/12/2017,Babis I,-5.33052,0.80964,1,0,?eská strana sociáln? demokratická,2018,2017
+CZE,Czech Republic,21/10/2017,27/06/2018,Babis II,-8.07192,0.951915,1,0,Akce nespokojených ob?an? 2011,2019,2018
+CZE,Czech Republic,21/10/2017,27/06/2018,Babis II,-8.07192,0.951915,1,0,?eská strana sociáln? demokratická,2020,2019
+DEU,Germany,27/09/2009,28/10/2009,Merkel II,3.99088746,2.993221865,0,0,Freie Demokratische Partei,2012,2011
+DEU,Germany,27/09/2009,28/10/2009,Merkel II,3.99088746,2.993221865,0,0,Freie Demokratische Partei,2013,2012
+DEU,Germany,22/09/2013,17/12/2013,Merkel III,-5.944881141,3.723264659,1,0,Freie Demokratische Partei,2014,2013
+DEU,Germany,22/09/2013,17/12/2013,Merkel III,-5.944881141,3.723264659,1,0,Christlich Demokratische Union / Christlich Soziale Union,2015,2014
+DEU,Germany,22/09/2013,17/12/2013,Merkel III,-5.944881141,3.723264659,1,0,Christlich Demokratische Union / Christlich Soziale Union,2016,2015
+DEU,Germany,22/09/2013,17/12/2013,Merkel III,-5.944881141,3.723264659,1,0,Christlich Demokratische Union / Christlich Soziale Union,2017,2016
+DEU,Germany,24/09/2017,24/09/2017,Merkel IV,-3.672901269,1.826221439,1,0,Christlich Demokratische Union / Christlich Soziale Union,2018,2017
+DEU,Germany,24/09/2017,14/03/2018,Merkel V,-3.672901269,1.826221439,1,0,Christlich Demokratische Union / Christlich Soziale Union,2019,2018
+DEU,Germany,24/09/2017,14/03/2018,Merkel V,-3.672901269,1.826221439,1,0,Christlich Demokratische Union / Christlich Soziale Union,2020,2019
+DNK,Denmark,15/09/2011,02/10/2011,Thorning-Schmidt I,-5.734430168,2.511994413,1,0,Det Radikale Venstre,2012,2011
+DNK,Denmark,15/09/2011,02/10/2011,Thorning-Schmidt I,-5.734430168,2.511994413,1,0,Det Radikale Venstre,2013,2012
+DNK,Denmark,15/09/2011,02/10/2011,Thorning-Schmidt I,-5.734430168,2.511994413,1,0,Det Radikale Venstre,2014,2013
+DNK,Denmark,15/09/2011,03/02/2014,Thorning-Schmidt II,-1.67472067,1.820240223,1,0,Socialdemokraterne,2015,2014
+DNK,Denmark,18/06/2015,28/06/2015,Rasmussen L II,3.385184358,0,0,0,Venstre,2016,2015
+DNK,Denmark,18/06/2015,28/11/2016,Rasmussen L III,7.481005587,0,0,0,Venstre,2017,2016
+DNK,Denmark,18/06/2015,28/11/2016,Rasmussen L III,7.481005587,0,0,0,Venstre,2018,2017
+DNK,Denmark,18/06/2015,28/11/2016,Rasmussen L III,7.481005587,0,0,0,Venstre,2019,2018
+DNK,Denmark,05/06/2019,27/06/2019,Frederiksen,-4.956335196,4.315977654,1,0,Socialdemokraterne,2020,2019
+ESP,Spain,20/11/2011,21/12/2011,Rajoy I,-1.832365714,1.19412,1,0,Alianza-Partido Popular,2012,2011
+ESP,Spain,20/11/2011,21/12/2011,Rajoy I,-1.832365714,1.19412,1,0,Alianza-Partido Popular,2013,2012
+ESP,Spain,20/11/2011,21/12/2011,Rajoy I,-1.832365714,1.19412,1,0,Alianza-Partido Popular,2014,2013
+ESP,Spain,20/11/2011,21/12/2011,Rajoy I,-1.832365714,1.19412,1,0,Alianza-Partido Popular,2015,2014
+ESP,Spain,20/12/2015,20/12/2015,Rajoy II,-1.49322,0.650494286,1,0,Alianza-Partido Popular,2016,2015
+ESP,Spain,26/06/2016,29/10/2016,Rajoy IV,-1.66318,0.724534286,1,0,Alianza-Partido Popular,2017,2016
+ESP,Spain,26/06/2016,29/10/2016,Rajoy IV,-1.66318,0.724534286,1,0,Independent,2018,2017
+ESP,Spain,26/06/2016,02/06/2018,Sanchez I,-5.980114286,0.339757143,1,0,Independent,2019,2018
+ESP,Spain,28/04/2019,28/04/2019,Sanchez II,-10.28526,0.81672,1,0,Partido Socialista Obrero Español,2020,2019
+EST,Estonia,06/03/2011,05/04/2011,Ansip IV,1.741138614,2.58819802,0,0,Eesti Reformierakond,2012,2011
+EST,Estonia,06/03/2011,05/04/2011,Ansip IV,1.741138614,2.58819802,0,0,Eesti Reformierakond,2013,2012
+EST,Estonia,06/03/2011,05/04/2011,Ansip IV,1.741138614,2.58819802,0,0,Eesti Reformierakond,2014,2013
+EST,Estonia,06/03/2011,26/03/2014,Roivas I,-0.549782178,2.724722772,1,0,Eesti Reformierakond,2015,2014
+EST,Estonia,01/03/2015,09/04/2015,Roivas II,-0.28429703,2.539485149,1,0,Eesti Reformierakond,2016,2015
+EST,Estonia,01/03/2015,20/11/2016,Ratas I,-6.259762376,2.117287129,1,0,Independent,2017,2016
+EST,Estonia,01/03/2015,20/11/2016,Ratas I,-6.259762376,2.117287129,1,0,Social Democratic Party | Moderates,2018,2017
+EST,Estonia,01/03/2015,20/11/2016,Ratas I,-6.259762376,2.117287129,1,0,Social Democratic Party | Moderates,2019,2018
+EST,Estonia,03/03/2019,29/04/2019,Ratas II,5.94180198,1.975891089,0,0,Social Democratic Party | Moderates,2020,2019
+FIN,Finland,17/04/2011,22/06/2011,Katainen I,-5.44085,2.55061,1,1,Vihreä Liitto – Gröna Förbundet,2012,2011
+FIN,Finland,17/04/2011,22/06/2011,Katainen I,-5.44085,2.55061,1,1,Vihreä Liitto – Gröna Förbundet,2013,2012
+FIN,Finland,17/04/2011,22/06/2011,Katainen I,-5.44085,2.55061,1,1,Vihreä Liitto – Gröna Förbundet,2014,2013
+FIN,Finland,17/04/2011,25/03/2014,Katainen II,-2.30716,2.30645,1,1,Vihreä Liitto – Gröna Förbundet,2015,2014
+FIN,Finland,19/04/2015,29/05/2015,Sipilae I,-4.322075,2.920035,1,0,Kansallinen Kokoomus – Samlingspartiet,2016,2015
+FIN,Finland,19/04/2015,29/05/2015,Sipilae I,-4.322075,2.920035,1,0,Kansallinen Kokoomus – Samlingspartiet,2017,2016
+FIN,Finland,19/04/2015,13/06/2017,Sipilae II,-3.877835,2.850195,1,0,Kansallinen Kokoomus – Samlingspartiet,2018,2017
+FIN,Finland,19/04/2015,13/06/2017,Sipilae II,-3.877835,2.850195,1,0,Kansallinen Kokoomus – Samlingspartiet,2019,2018
+FIN,Finland,14/04/2019,06/06/2019,Rinne,-15.82482,6.961715,1,1,Suomen Sosialidemokraattinen Puolue – Finlands Socialdemokratiska Parti,2020,2019
+FRA,France,17/06/2007,14/11/2010,Fillon III,-7.125720971,3.62557539,1,0,Union pour un mouvement populaire | Les Républicains,2012,2011
+FRA,France,17/06/2012,18/06/2012,Ayrault II,-17.40231889,2.081870017,1,1,Parti socialiste,2013,2012
+FRA,France,17/06/2012,18/06/2012,Ayrault II,-17.40231889,2.081870017,1,1,Parti socialiste,2014,2013
+FRA,France,17/06/2012,26/08/2014,Valls II,-17.17394801,1.761989601,1,0,Parti socialiste,2015,2014
+FRA,France,17/06/2012,26/08/2014,Valls II,-17.17394801,1.761989601,1,0,Parti socialiste,2016,2015
+FRA,France,17/06/2012,11/02/2016,Valls III,-17.17394801,1.761989601,1,0,Parti socialiste,2017,2016
+FRA,France,18/06/2017,21/06/2017,Philippe II,1.286863085,2.710069324,0,0,Parti socialiste,2018,2017
+FRA,France,18/06/2017,21/06/2017,Philippe II,1.286863085,2.710069324,0,0,Union pour un mouvement populaire | Les Républicains,2019,2018
+FRA,France,18/06/2017,21/06/2017,Philippe II,1.286863085,2.710069324,0,0,Union pour un mouvement populaire | Les Républicains,2020,2019
+GBR,United Kingdom,06/05/2010,11/05/2010,Cameron I,8.692923077,3.110861538,0,0,Conservatives,2012,2011
+GBR,United Kingdom,06/05/2010,11/05/2010,Cameron I,8.692923077,3.110861538,0,0,Conservatives,2013,2012
+GBR,United Kingdom,06/05/2010,11/05/2010,Cameron I,8.692923077,3.110861538,0,0,Conservatives,2014,2013
+GBR,United Kingdom,06/05/2010,11/05/2010,Cameron I,8.692923077,3.110861538,0,0,Conservatives,2015,2014
+GBR,United Kingdom,07/05/2015,08/05/2015,Cameron II,-0.801529231,2.084281538,1,0,Conservatives,2016,2015
+GBR,United Kingdom,07/05/2015,13/07/2016,May I,-0.801529231,2.084281538,1,0,Conservatives,2017,2016
+GBR,United Kingdom,08/06/2017,11/06/2017,May II,-1.275424615,0.980907692,1,0,Conservatives,2018,2017
+GBR,United Kingdom,08/06/2017,11/06/2017,May II,-1.275424615,0.980907692,1,0,Conservatives,2019,2018
+GBR,United Kingdom,08/06/2017,24/07/2019,Johnson I,-1.275424615,0.980907692,1,0,Conservatives,2020,2019
+GRC,Greece,04/10/2009,11/11/2011,Papademos,NA,NA,NA,0,Néa ?imokratía,2012,2011
+GRC,Greece,17/06/2012,20/06/2012,Samaras I,12.31084333,0.29767,0,0,Néa ?imokratía,2013,2012
+GRC,Greece,17/06/2012,25/06/2013,Samaras II,12.69102,0,0,0,Néa ?imokratía,2014,2013
+GRC,Greece,17/06/2012,25/06/2013,Samaras II,12.69102,0,0,0,Panellinio Sosialistikó Kínima,2015,2014
+GRC,Greece,20/09/2015,21/09/2015,Tsipras II,-10.74643333,1.005816667,1,0,Synaspismós Rizospastikís Aristerás,2016,2015
+GRC,Greece,20/09/2015,21/09/2015,Tsipras II,-10.74643333,1.005816667,1,0,Synaspismós Rizospastikís Aristerás,2017,2016
+GRC,Greece,20/09/2015,21/09/2015,Tsipras II,-10.74643333,1.005816667,1,0,Synaspismós Rizospastikís Aristerás,2018,2017
+GRC,Greece,20/09/2015,21/09/2015,Tsipras II,-10.74643333,1.005816667,1,0,Synaspismós Rizospastikís Aristerás,2019,2018
+GRC,Greece,20/09/2015,13/01/2019,Tsipras III,-10.74643333,1.005816667,1,0,Synaspismós Rizospastikís Aristerás,2020,2019
+HUN,Hungary,25/04/2010,29/05/2010,Orban II,-3.040170984,0.396544041,1,0,Fidesz – Magyar Polgári Szövetség,2012,2011
+HUN,Hungary,25/04/2010,29/05/2010,Orban II,-3.040170984,0.396544041,1,0,Fidesz – Magyar Polgári Szövetség,2013,2012
+HUN,Hungary,25/04/2010,29/05/2010,Orban II,-3.040170984,0.396544041,1,0,Fidesz – Magyar Polgári Szövetség,2014,2013
+HUN,Hungary,06/04/2014,10/05/2014,Orban III,23.66664824,0,0,0,Fidesz – Magyar Polgári Szövetség,2015,2014
+HUN,Hungary,06/04/2014,10/05/2014,Orban III,23.66664824,0,0,0,Fidesz – Magyar Polgári Szövetség,2016,2015
+HUN,Hungary,06/04/2014,10/05/2014,Orban III,23.66664824,0,0,0,Fidesz – Magyar Polgári Szövetség,2017,2016
+HUN,Hungary,06/04/2014,10/05/2014,Orban III,23.66664824,0,0,0,Fidesz – Magyar Polgári Szövetség,2018,2017
+HUN,Hungary,08/04/2018,10/05/2018,Orban IV,32.51816583,0,0,0,Fidesz – Magyar Polgári Szövetség,2019,2018
+HUN,Hungary,08/04/2018,10/05/2018,Orban IV,32.51816583,0,0,0,Fidesz – Magyar Polgári Szövetség,2020,2019
+IRL,Ireland,25/02/2011,09/03/2011,Kenny I,-2.025277108,2.336078313,1,0,Labour Party,2012,2011
+IRL,Ireland,25/02/2011,09/03/2011,Kenny I,-2.025277108,2.336078313,1,0,Labour Party,2013,2012
+IRL,Ireland,25/02/2011,09/03/2011,Kenny I,-2.025277108,2.336078313,1,0,Labour Party,2014,2013
+IRL,Ireland,25/02/2011,09/03/2011,Kenny I,-2.025277108,2.336078313,1,0,Labour Party,2015,2014
+IRL,Ireland,25/02/2011,09/03/2011,Kenny I,-2.025277108,2.336078313,1,0,Fine Gael,2016,2015
+IRL,Ireland,26/02/2016,06/05/2016,Kenny II,-5.160392405,1.525949367,1,0,Fine Gael,2017,2016
+IRL,Ireland,26/02/2016,14/06/2017,Varadkar I,-5.160392405,1.525949367,1,0,Fine Gael,2018,2017
+IRL,Ireland,26/02/2016,14/06/2017,Varadkar I,-5.160392405,1.525949367,1,0,Fine Gael,2019,2018
+IRL,Ireland,26/02/2016,14/06/2017,Varadkar I,-5.160392405,1.525949367,1,0,Fine Gael,2020,2019
+ISL,Iceland,25/04/2009,25/04/2009,Sigurdardottir II,-2.865936508,3.418730159,1,1,Samfylkingin,2012,2011
+ISL,Iceland,25/04/2009,25/04/2009,Sigurdardottir II,-2.865936508,3.418730159,1,1,Samfylkingin,2013,2012
+ISL,Iceland,27/04/2013,23/05/2013,Gunnlaugsson,-1.100492063,0.773269841,1,0,Framsóknarflokkurinn,2014,2013
+ISL,Iceland,27/04/2013,23/05/2013,Gunnlaugsson,-1.100492063,0.773269841,1,0,Framsóknarflokkurinn,2015,2014
+ISL,Iceland,27/04/2013,23/05/2013,Gunnlaugsson,-1.100492063,0.773269841,1,0,Framsóknarflokkurinn,2016,2015
+ISL,Iceland,27/04/2013,07/04/2016,Johannsson,-1.100492063,0.773269841,1,0,Framsóknarflokkurinn,2017,2016
+ISL,Iceland,29/10/2016,10/01/2017,Benediktsson B,0.846380952,1.338809524,0,0,Sjálfstæðisflokkurinn,2018,2017
+ISL,Iceland,28/10/2017,30/11/2017,Jakobsdottir I,-12.14163492,2.997190476,1,1,Sjálfstæðisflokkurinn,2019,2018
+ISL,Iceland,28/10/2017,30/11/2017,Jakobsdottir I,-12.14163492,2.997190476,1,1,Sjálfstæðisflokkurinn,2020,2019
+ISR,Israel,10/02/2009,17/01/2011,Netanyahu V,13.19009167,0.414391667,0,0,Yisrael Beiteinu,2012,2011
+ISR,Israel,10/02/2009,08/05/2012,Netanyahu VI,14.765325,1.398825,0,0,Yisrael Beiteinu,2013,2012
+ISR,Israel,22/01/2013,18/03/2013,Netanyahu VII,NA,NA,NA,0,Likud,2014,2013
+ISR,Israel,22/01/2013,02/12/2014,Netanyahu VIII,NA,NA,NA,0,Yisrael Beiteinu,2015,2014
+ISR,Israel,17/03/2015,14/05/2015,Netanyahu IX,26.20981667,0.340133333,0,0,Yisrael Beiteinu,2016,2015
+ISR,Israel,17/03/2015,30/05/2016,Netanyahu X,28.51316667,0.340133333,0,0,Likud,2017,2016
+ISR,Israel,17/03/2015,30/05/2016,Netanyahu X,28.51316667,0.340133333,0,0,Likud,2018,2017
+ISR,Israel,17/03/2015,18/11/2018,Netanyahu XI,26.20981667,0.340133333,0,0,Likud,2019,2018
+ISR,Israel,17/09/2019,17/09/2019,Netanyahu XIII,NA,NA,NA,0,Likud,2020,2019
+ITA,Italy,13/04/2008,16/11/2011,Monti,0,0,NA,0,Independent,2012,2011
+ITA,Italy,13/04/2008,16/11/2011,Monti,0,0,NA,0,Independent,2013,2012
+ITA,Italy,25/02/2013,27/04/2013,Letta I,-2.287425397,3.018879365,1,0,Radicali,2014,2013
+ITA,Italy,25/02/2013,22/02/2014,Renzi,-2.704711111,2.340926984,1,0,Radicali,2015,2014
+ITA,Italy,25/02/2013,22/02/2014,Renzi,-2.704711111,2.340926984,1,0,Partito Democratico,2016,2015
+ITA,Italy,25/02/2013,12/12/2016,Gentiloni,-2.778377778,2.082969841,1,0,Partito Democratico,2017,2016
+ITA,Italy,25/02/2013,12/12/2016,Gentiloni,-2.778377778,2.082969841,1,0,Nuovo Centrodestra | Alternativa Popolare,2018,2017
+ITA,Italy,04/03/2018,01/06/2018,Conte I,-1.760379365,10.31816508,1,0,Nuovo Centrodestra | Alternativa Popolare,2019,2018
+ITA,Italy,04/03/2018,05/09/2019,Conte II,-4.559709524,9.047361905,1,0,Independent,2020,2019
+JPN,Japan,30/08/2009,30/08/2011,Noda,-30.37772708,2.497070833,1,0,Minshut?,2012,2011
+JPN,Japan,16/12/2012,26/12/2012,Abe III,-11.96455833,3.821585417,1,0,Jiy? Minshut?,2013,2012
+JPN,Japan,16/12/2012,26/12/2012,Abe III,-11.96455833,3.821585417,1,0,Jiy? Minshut?,2014,2013
+JPN,Japan,14/12/2014,24/12/2014,Abe IV,-2.849273684,2.200189474,1,0,Jiy? Minshut?,2015,2014
+JPN,Japan,14/12/2014,24/12/2014,Abe IV,-2.849273684,2.200189474,1,0,Jiy? Minshut?,2016,2015
+JPN,Japan,14/12/2014,24/12/2014,Abe IV,-2.849273684,2.200189474,1,0,Jiy? Minshut?,2017,2016
+JPN,Japan,22/10/2017,01/11/2017,Abe V,-8.936,2.351883871,1,0,Jiy? Minshut?,2018,2017
+JPN,Japan,22/10/2017,01/11/2017,Abe V,-8.936,2.351883871,1,0,Jiy? Minshut?,2019,2018
+JPN,Japan,22/10/2017,01/11/2017,Abe V,-8.936,2.351883871,1,0,Jiy? Minshut?,2020,2019
+LUX,Luxembourg,07/06/2009,23/07/2009,Juncker IV,-8.7594,4.2666,1,0,Lëtzebuerger Sozialistesch Aarbechterpartei,2012,2011
+LUX,Luxembourg,07/06/2009,23/07/2009,Juncker IV,-8.7594,4.2666,1,0,Lëtzebuerger Sozialistesch Aarbechterpartei,2013,2012
+LUX,Luxembourg,07/06/2009,11/07/2013,Juncker V,-8.7594,4.2666,1,0,Lëtzebuerger Sozialistesch Aarbechterpartei,2014,2013
+LUX,Luxembourg,20/10/2013,04/12/2013,Bettel I,-9.95415,2.456016667,1,1,Lëtzebuerger Sozialistesch Aarbechterpartei,2015,2014
+LUX,Luxembourg,20/10/2013,04/12/2013,Bettel I,-9.95415,2.456016667,1,1,Lëtzebuerger Sozialistesch Aarbechterpartei,2016,2015
+LUX,Luxembourg,20/10/2013,04/12/2013,Bettel I,-9.95415,2.456016667,1,1,Lëtzebuerger Sozialistesch Aarbechterpartei,2017,2016
+LUX,Luxembourg,20/10/2013,04/12/2013,Bettel I,-9.95415,2.456016667,1,1,Lëtzebuerger Sozialistesch Aarbechterpartei,2018,2017
+LUX,Luxembourg,14/10/2018,05/12/2018,Bettel II,NA,NA,NA,1,Lëtzebuerger Sozialistesch Aarbechterpartei,2019,2018
+LUX,Luxembourg,14/10/2018,05/12/2018,Bettel II,NA,NA,NA,1,Lëtzebuerger Sozialistesch Aarbechterpartei,2020,2019
+MEX,Mexico,02/07/2006,01/12/2006,Calderón,-0.323008,1.420576,1,0,Alliance for Change,2012,2011
+MEX,Mexico,01/07/2012,01/12/2012,Nieto,-8.507136,7.12108,1,0,Institutional Revolutionary Party,2013,2012
+MEX,Mexico,01/07/2012,01/12/2012,Nieto,-8.507136,7.12108,1,0,Institutional Revolutionary Party,2014,2013
+MEX,Mexico,01/07/2012,01/12/2012,Nieto,-8.507136,7.12108,1,0,Institutional Revolutionary Party,2015,2014
+MEX,Mexico,01/07/2012,01/12/2012,Nieto,-8.507136,7.12108,1,0,Institutional Revolutionary Party,2016,2015
+MEX,Mexico,01/07/2012,01/12/2012,Nieto,-8.507136,7.12108,1,0,Institutional Revolutionary Party,2017,2016
+MEX,Mexico,01/07/2012,01/12/2012,Nieto,-8.507136,7.12108,1,0,Institutional Revolutionary Party,2018,2017
+MEX,Mexico,01/07/2018,01/12/2018,Obrador,5.7491,0.383146,0,0,National Regeneration Movement,2019,2018
+MEX,Mexico,01/07/2018,01/12/2018,Obrador,5.7491,0.383146,0,0,National Regeneration Movement,2020,2019
+NLD,Netherlands,09/06/2010,14/10/2010,Rutte I,5.346953333,0.9294,0,0,Volkspartij voor Vrijheid en Democratie,2012,2011
+NLD,Netherlands,12/09/2012,05/11/2012,Rutte III,4.5239,0.998006667,0,0,Partij van de Arbeid,2013,2012
+NLD,Netherlands,12/09/2012,05/11/2012,Rutte III,4.5239,0.998006667,0,0,Partij van de Arbeid,2014,2013
+NLD,Netherlands,12/09/2012,05/11/2012,Rutte III,4.5239,0.998006667,0,0,Partij van de Arbeid,2015,2014
+NLD,Netherlands,12/09/2012,05/11/2012,Rutte III,4.5239,0.998006667,0,0,Partij van de Arbeid,2016,2015
+NLD,Netherlands,12/09/2012,05/11/2012,Rutte III,4.5239,0.998006667,0,0,Partij van de Arbeid,2017,2016
+NLD,Netherlands,15/03/2017,26/10/2017,Rutte V,2.22356,1.9383,0,0,Partij van de Arbeid,2018,2017
+NLD,Netherlands,15/03/2017,26/10/2017,Rutte V,2.22356,1.9383,0,0,Democraten 66,2019,2018
+NLD,Netherlands,15/03/2017,26/10/2017,Rutte V,2.22356,1.9383,0,0,Democraten 66,2020,2019
+NOR,Norway,14/09/2009,20/10/2009,Stoltenberg III,-15.21963905,5.265680473,1,0,Sosialistisk Venstreparti,2012,2011
+NOR,Norway,14/09/2009,20/10/2009,Stoltenberg III,-15.21963905,5.265680473,1,0,Sosialistisk Venstreparti,2013,2012
+NOR,Norway,09/09/2013,16/10/2013,Solberg I,-2.893094675,1.522573964,1,0,Sosialistisk Venstreparti,2014,2013
+NOR,Norway,09/09/2013,16/10/2013,Solberg I,-2.893094675,1.522573964,1,0,Høyre,2015,2014
+NOR,Norway,09/09/2013,16/10/2013,Solberg I,-2.893094675,1.522573964,1,0,Høyre,2016,2015
+NOR,Norway,09/09/2013,16/10/2013,Solberg I,-2.893094675,1.522573964,1,0,Høyre,2017,2016
+NOR,Norway,11/09/2017,11/09/2017,Solberg II,0.183514793,1.810650888,0,0,Høyre,2018,2017
+NOR,Norway,11/09/2017,17/01/2018,Solberg III,-0.449715976,2.178745562,1,0,Høyre,2019,2018
+NOR,Norway,11/09/2017,22/01/2019,Solberg IV,-1.033289941,2.369467456,1,0,Høyre,2020,2019
+NZL,New Zealand,26/11/2011,14/12/2011,Key II,-0.615355372,2.00014876,1,0,National Party,2012,2011
+NZL,New Zealand,26/11/2011,14/12/2011,Key II,-0.615355372,2.00014876,1,0,National Party,2013,2012
+NZL,New Zealand,26/11/2011,14/12/2011,Key II,-0.615355372,2.00014876,1,0,National Party,2014,2013
+NZL,New Zealand,20/09/2014,08/10/2014,Key III,-3.345619835,2.425785124,1,0,National Party,2015,2014
+NZL,New Zealand,20/09/2014,08/10/2014,Key III,-3.345619835,2.425785124,1,0,National Party,2016,2015
+NZL,New Zealand,20/09/2014,12/12/2016,English,-3.345619835,2.425785124,1,0,National Party,2017,2016
+NZL,New Zealand,23/09/2017,26/10/2017,Ardern I,-9.907266667,3.905808333,1,0,New Zealand First Party,2018,2017
+NZL,New Zealand,23/09/2017,26/10/2017,Ardern I,-9.907266667,3.905808333,1,0,New Zealand First Party,2019,2018
+NZL,New Zealand,23/09/2017,26/10/2017,Ardern I,-9.907266667,3.905808333,1,0,New Zealand First Party,2020,2019
+POL,Poland,09/10/2011,18/11/2011,Tusk II,-0.872058696,2.108680435,1,0,Platforma Obywatelska,2012,2011
+POL,Poland,09/10/2011,18/11/2011,Tusk II,-0.872058696,2.108680435,1,0,Platforma Obywatelska,2013,2012
+POL,Poland,09/10/2011,18/11/2011,Tusk II,-0.872058696,2.108680435,1,0,Platforma Obywatelska,2014,2013
+POL,Poland,09/10/2011,22/09/2014,Kopacz,-0.872058696,2.108680435,1,0,Platforma Obywatelska,2015,2014
+POL,Poland,25/10/2015,16/11/2015,Szydlo,5.523521739,0.403076087,0,0,Prawo i Sprawiedliwo??,2016,2015
+POL,Poland,25/10/2015,16/11/2015,Szydlo,5.523521739,0.403076087,0,0,Prawo i Sprawiedliwo??,2017,2016
+POL,Poland,25/10/2015,11/12/2017,Morawiecki I,5.523521739,0.403076087,0,0,Independent,2018,2017
+POL,Poland,25/10/2015,11/12/2017,Morawiecki I,5.523521739,0.403076087,0,0,Independent,2019,2018
+POL,Poland,13/10/2019,15/11/2019,Morawiecki II,5.71101087,2.023043478,0,0,Independent,2020,2019
+PRT,Portugal,05/06/2011,15/06/2011,Passos Coelho I,8.396504348,1.264017391,0,0,Centro Democrático e Social – Partido Popular,2012,2011
+PRT,Portugal,05/06/2011,15/06/2011,Passos Coelho I,8.396504348,1.264017391,0,0,Centro Democrático e Social – Partido Popular,2013,2012
+PRT,Portugal,05/06/2011,15/06/2011,Passos Coelho I,8.396504348,1.264017391,0,0,Centro Democrático e Social – Partido Popular,2014,2013
+PRT,Portugal,05/06/2011,15/06/2011,Passos Coelho I,8.396504348,1.264017391,0,0,Partido Social Democrata,2015,2014
+PRT,Portugal,04/10/2015,26/11/2015,Costa I,-1.692330435,2.565043478,1,0,Partido Socialista,2016,2015
+PRT,Portugal,04/10/2015,26/11/2015,Costa I,-1.692330435,2.565043478,1,0,Partido Socialista,2017,2016
+PRT,Portugal,04/10/2015,26/11/2015,Costa I,-1.692330435,2.565043478,1,0,Partido Socialista,2018,2017
+PRT,Portugal,04/10/2015,26/11/2015,Costa I,-1.692330435,2.565043478,1,0,Partido Socialista,2019,2018
+PRT,Portugal,06/10/2019,26/10/2019,Costa II,-5.926382609,2.735217391,1,0,Partido Socialista,2020,2019
+ROK,Republic of Korea,09/12/2007,24/02/2008,Myung-bak,-1.3974,2.04,1,0,Grand National Party,2012,2011
+ROK,Republic of Korea,09/12/2007,24/02/2008,Myung-bak,-1.3974,2.04,1,0,Grand National Party,2013,2012
+ROK,Republic of Korea,19/12/2012,25/02/2013,Geun-hye,-16.22904,1.385226667,1,0,New Frontier Party,2014,2013
+ROK,Republic of Korea,19/12/2012,25/02/2013,Geun-hye,-16.22904,1.385226667,1,0,New Frontier Party,2015,2014
+ROK,Republic of Korea,19/12/2012,25/02/2013,Geun-hye,-16.22904,1.385226667,1,0,New Frontier Party,2016,2015
+ROK,Republic of Korea,19/12/2012,25/02/2013,Geun-hye,-16.22904,1.385226667,1,0,New Frontier Party,2017,2016
+ROK,Republic of Korea,09/05/2017,10/05/2017,Jae-in,-17.42828,0,1,0,Democratic Party,2018,2017
+ROK,Republic of Korea,09/05/2017,10/05/2017,Jae-in,-17.42828,0,1,0,Democratic Party,2019,2018
+ROK,Republic of Korea,09/05/2017,10/05/2017,Jae-in,-17.42828,0,1,0,Democratic Party,2020,2019
+SVK,Slovakia,12/06/2010,20/10/2011,Radicova II,4.722173333,2.23672,0,0,Slovenská demokratická a kres?anská únia – Demokratická strana,2012,2011
+SVK,Slovakia,10/03/2012,04/04/2012,Fico II,-5.384486667,0.495786667,1,0,Smer – sociálna demokracia,2013,2012
+SVK,Slovakia,10/03/2012,04/04/2012,Fico II,-5.384486667,0.495786667,1,0,Smer – sociálna demokracia,2014,2013
+SVK,Slovakia,10/03/2012,04/04/2012,Fico II,-5.384486667,0.495786667,1,0,Smer – sociálna demokracia,2015,2014
+SVK,Slovakia,10/03/2012,04/04/2012,Fico II,-5.384486667,0.495786667,1,0,Smer – sociálna demokracia,2016,2015
+SVK,Slovakia,06/03/2016,01/09/2016,Fico IV,-1.39512,0.615386667,1,0,Smer – sociálna demokracia,2017,2016
+SVK,Slovakia,06/03/2016,01/09/2016,Fico IV,-1.39512,0.615386667,1,0,Smer – sociálna demokracia,2018,2017
+SVK,Slovakia,06/03/2016,22/03/2018,Pellegrini,-1.39512,0.615386667,1,0,Smer – sociálna demokracia,2019,2018
+SVK,Slovakia,06/03/2016,22/03/2018,Pellegrini,-1.39512,0.615386667,1,0,Smer – sociálna demokracia,2020,2019
+SVN,Slovenia,21/09/2008,27/06/2011,Pahor II,-3.278822222,0.963711111,1,0,Združena lista – Socialni demokrati,2012,2011
+SVN,Slovenia,04/12/2011,28/01/2012,Jansa II,0.300577778,3.206177778,0,0,Demokrati?na stranka upokojencev Slovenije,2013,2012
+SVN,Slovenia,04/12/2011,20/03/2013,Bratusek,3.946288889,2.209733333,0,0,Demokrati?na stranka upokojencev Slovenije,2014,2013
+SVN,Slovenia,13/07/2014,25/08/2014,Cerar,-7.286622222,1.603577778,1,0,Demokrati?na stranka upokojencev Slovenije,2015,2014
+SVN,Slovenia,13/07/2014,25/08/2014,Cerar,-7.286622222,1.603577778,1,0,Demokrati?na stranka upokojencev Slovenije,2016,2015
+SVN,Slovenia,13/07/2014,25/08/2014,Cerar,-7.286622222,1.603577778,1,0,Demokrati?na stranka upokojencev Slovenije,2017,2016
+SVN,Slovenia,13/07/2014,25/08/2014,Cerar,-7.286622222,1.603577778,1,0,Demokrati?na stranka upokojencev Slovenije,2018,2017
+SVN,Slovenia,03/06/2018,17/08/2018,Sarec,-3.734655556,1.853566667,1,0,Demokrati?na stranka upokojencev Slovenije,2019,2018
+SVN,Slovenia,03/06/2018,17/08/2018,Sarec,-3.734655556,1.853566667,1,0,Demokrati?na stranka upokojencev Slovenije,2020,2019
+SWE,Sweden,19/09/2010,19/09/2010,Reinfeldt II,0.725383954,5.4522149,0,0,Moderaterna,2012,2011
+SWE,Sweden,19/09/2010,19/09/2010,Reinfeldt II,0.725383954,5.4522149,0,0,Moderaterna,2013,2012
+SWE,Sweden,19/09/2010,19/09/2010,Reinfeldt II,0.725383954,5.4522149,0,0,Moderaterna,2014,2013
+SWE,Sweden,14/09/2014,02/10/2014,Lofven I,-18.87065903,2.744426934,1,1,Miljöpartiet de Gröna,2015,2014
+SWE,Sweden,14/09/2014,02/10/2014,Lofven I,-18.87065903,2.744426934,1,1,Miljöpartiet de Gröna,2016,2015
+SWE,Sweden,14/09/2014,02/10/2014,Lofven I,-18.87065903,2.744426934,1,1,Miljöpartiet de Gröna,2017,2016
+SWE,Sweden,14/09/2014,02/10/2014,Lofven I,-18.87065903,2.744426934,1,1,Miljöpartiet de Gröna,2018,2017
+SWE,Sweden,09/09/2018,09/09/2018,Lofven II,-6.462624642,2.911919771,1,1,Miljöpartiet de Gröna,2019,2018
+SWE,Sweden,09/09/2018,18/01/2019,Lofven III,-6.462624642,2.911919771,1,1,Miljöpartiet de Gröna,2020,2019
+TUR,Turkey,22/07/2007,29/08/2007,Erdogan II,2.604,0.47554,0,0,Adalet ve Kalk?nma Partisi,2012,2011
+TUR,Turkey,22/07/2007,29/08/2007,Erdogan II,2.604,0.47554,0,0,Adalet ve Kalk?nma Partisi,2013,2012
+TUR,Turkey,22/07/2007,29/08/2007,Erdogan II,2.604,0.47554,0,0,Adalet ve Kalk?nma Partisi,2014,2013
+TUR,Turkey,12/06/2011,28/08/2014,Davutoglu I,-5.335450909,1.615974545,1,0,Adalet ve Kalk?nma Partisi,2015,2014
+TUR,Turkey,01/11/2015,30/11/2015,Davutoglu III,-4.25414,1.390765455,1,0,Adalet ve Kalk?nma Partisi,2016,2015
+TUR,Turkey,01/11/2015,24/05/2016,Yildirim,-4.25414,1.390765455,1,0,Adalet ve Kalk?nma Partisi,2017,2016
+TUR,Turkey,01/11/2015,24/05/2016,Yildirim,-4.25414,1.390765455,1,0,Adalet ve Kalk?nma Partisi,2018,2017
+TUR,Turkey,24/06/2018,09/07/2018,Erdogan IV,-3.3335,1.567925,1,0,Independent,2019,2018
+TUR,Turkey,24/06/2018,09/07/2018,Erdogan IV,-3.3335,1.567925,1,0,Independent,2020,2019
+USA,United States of America,04/11/2008,01/01/2008,Obama I,6.581563218,2.741333333,0,0,Democrats,2012,2011
+USA,United States of America,04/11/2008,01/01/2008,Obama I,6.581563218,2.741333333,0,0,Democrats,2013,2012
+USA,United States of America,06/11/2012,20/01/2013,Obama II,-2.976648276,1.251744828,1,0,Democrats,2014,2013
+USA,United States of America,06/11/2012,20/01/2013,Obama II,-2.976648276,1.251744828,1,0,Democrats,2015,2014
+USA,United States of America,06/11/2012,20/01/2013,Obama II,-2.976648276,1.251744828,1,0,Democrats,2016,2015
+USA,United States of America,06/11/2012,20/01/2013,Obama II,-2.976648276,1.251744828,1,0,Democrats,2017,2016
+USA,United States of America,08/11/2016,20/01/2017,Trump,18.26558391,0.657071264,0,0,Republican Party,2018,2017
+USA,United States of America,08/11/2016,20/01/2017,Trump,18.26558391,0.657071264,0,0,Republican Party,2019,2018
+USA,United States of America,08/11/2016,20/01/2017,Trump,18.26558391,0.657071264,0,0,Republican Party,2020,2019

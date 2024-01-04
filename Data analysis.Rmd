@@ -1,0 +1,1529 @@
+---
+title: "Data analysis"
+author: "XWXJ2"
+date: "17/02/2023"
+output: word_document
+---
+```{r}
+rm(list = ls())
+```
+
+###In this document I will conduct the data analysis for my dissertation
+
+Firstly, we need to load in the OECD data and combine the dataset with the government key
+
+##Libraries
+```{r}
+library(AER)
+library(plm)
+library(dplyr)
+library(lubridate)
+library(stargazer)
+library(ggplot2)
+```
+
+##Combining OECD and government key datasets
+
+```{r}
+##Loading in government key
+government_key_4 <- read.csv("government_key_4.csv")
+```
+
+```{r}
+##Loading in OECD DAC data
+OECD <- read.csv("OECD.csv")
+```
+
+```{r}
+##Renaming dataset form combination
+my_data <- OECD
+```
+
+```{r}
+##Adding columns to dataset
+my_data$cabinet_name <- 0
+  
+my_data$gov_RILE <- 0
+
+my_data$gov_per501 <- 0
+
+my_data$left_dummy <- 0
+
+my_data$green_party <- 0
+
+my_data$cab_start_year <- 0
+```
+
+```{r}
+##Moving columns
+my_data <- my_data %>% relocate(39:44, .after = 3)
+```
+
+```{r}
+##Removing countries not being covered in sample
+rm_list <- c("Azerbaijan", "Bulgaria", "Chinese Taipei", "Cyprus", "Croatia", "EU Institutions (excl. EIB)", "Kazakhstan", "Kuwait", "Latvia", "Lithuania", "Malta", "Russia", "Saudi Arabia", "Thailand", "United Arab Emirates", "Romania")
+
+for (i in rm_list){
+  my_data <- my_data[my_data$Provider != i,]
+}
+```
+
+```{r}
+##Changing country names to fit gov_key
+my_data$Provider[my_data$Provider == "Korea"] <- "Republic of Korea"
+
+my_data$Provider[my_data$Provider == "Slovak Republic"] <- "Slovakia"
+
+my_data$Provider[my_data$Provider == "United States"] <- "United States of America"
+```
+
+
+```{r}
+##Checking country changes worked
+print(unique(my_data$Provider))
+```
+There is evidently no data from Mexico in the OECD DAC, which explains why there are only 32 countries.
+
+```{r}
+##Getting loopy
+for (i in 1:nrow(my_data)){
+  x <- my_data$Year[i]
+  y <- my_data$Provider[i]
+  my_data$cabinet_name[i] <- government_key_4$cabinet_name[government_key_4$lagged_year == x & government_key_4$country_name == y]
+  my_data$gov_RILE[i] <- government_key_4$gov_RILE[government_key_4$lagged_year == x & government_key_4$country_name == y]
+  my_data$gov_per501[i] <- government_key_4$gov_per501[government_key_4$lagged_year == x & government_key_4$country_name == y]
+  my_data$left_dummy[i] <- government_key_4$left_dummy[government_key_4$lagged_year == x & government_key_4$country_name == y]
+  my_data$green_party[i] <- government_key_4$green_party[government_key_4$lagged_year == x & government_key_4$country_name == y]
+  my_data$cab_start_year[i] <- government_key_4$start_year[government_key_4$lagged_year == x & government_key_4$country_name == y]
+}
+
+length(my_data$cabinet_name[my_data$cabinet_name == 0])
+```
+##Climate finance principal objective
+
+As Peterson & Skovgaard note, the DAC database contains many projects that are not directly climate finance. Therefore, when conducting analysis I need to make sure to remove projects that do not have "Climate objective" as the "principal" objective.
+
+```{r}
+##Only keeping climate finance principal
+my_data <- my_data[my_data$Climate.objective..applies.to.Rio.marked.data.only..or.climate.component == "Principal",]
+```
+##Saving before something goes wrong
+```{r}
+write.csv(my_data, "C:/Users/maxsk/Documents/UCL/Year 3/Dissertation/Data/my_dataset.csv")
+```
+
+##QOG dataset
+
+I am using the QOG Gothenberg dataset for many of my control variables. To start my analysis, I am going to load in a measure of GDP per capita to standardise the climate finance variable for all countries in the sample.
+
+The wdi_gdpcapcur is a measure of GDP per capita in current US dollars.
+
+```{r}
+##Loading in QOG dataset
+QOG <- read.csv("qog_oecd.csv")
+```
+Some of the country names are slightly different, so we'll have to rename them before we incorporate.
+
+```{r}
+##Renaming countries in QOG to standardise
+QOG$cname[QOG$cname == "Czechia"] <- "Czech Republic"
+
+QOG$cname[QOG$cname == "Korea (the Republic of)"] <- "Republic of Korea"
+
+QOG$cname[QOG$cname == "Netherlands (the)"] <- "Netherlands"
+
+QOG$cname[QOG$cname == "United Kingdom of Great Britain and Northern Ireland (the)"] <- "United Kingdom"
+
+QOG$cname[QOG$cname == "United States of America (the)"] <- "United States of America"
+```
+##Saving before something goes wrong
+```{r}
+write.csv(QOG, "C:/Users/maxsk/Documents/UCL/Year 3/Dissertation/Data/QOG.csv")
+```
+
+```{r}
+##GDP per capita
+my_data$GDP_capita <- 0
+
+my_data <- my_data %>% relocate(45, .after = 9)
+```
+```{r}
+##Filling values from QOG
+for (i in 1:nrow(my_data)){
+  x <- my_data$Year[i]
+  y <- my_data$Provider[i]
+  my_data$GDP_capita[i] <- QOG$wdi_gdpcapcur[QOG$year == x & QOG$cname == y]
+}
+length(my_data$GDP_capita[my_data$GDP_capita == 0])
+```
+```{r}
+##Climate finance adj GDP per capita
+my_data$climate_finance_adj_GDP_cap <- 0
+
+my_data <- my_data %>% relocate(46, .after = 11)
+```
+
+```{r}
+##Climate finance adjusted
+my_data$climate_finance_adj_GDP_cap <- my_data$Climate.related.development.finance...Commitment...Current.USD.thousand/my_data$GDP_capita
+```
+##Saving before something goes wrong
+```{r}
+write.csv(my_data, "C:/Users/maxsk/Documents/UCL/Year 3/Dissertation/Data/my_dataset.csv")
+```
+
+##Data analysis
+
+##Trends over time
+
+```{r}
+##Distribution of left-right governments
+p_Year <- c(2012, 2013, 2014, 2015, 2016, 2017, 2018, 2019, 2020)
+p_RILE <- 0
+
+p_data <- data.frame(p_Year, p_RILE)
+```
+
+```{r}
+##summary data
+for (i in 1:nrow(p_data)){
+  x <- p_Year[i]
+  p_data$p_RILE[i] <- mean(my_data$gov_RILE[my_data$Year == x], na.rm = T)
+}
+```
+```{r}
+ggplot(p_data, aes(x = p_Year, y = p_RILE)) + 
+  geom_bar(stat = "identity") + 
+  labs(x = "Year", y = "Average government right-left score", title = "Trends in ideology over time in sample")
+```
+```{r}
+##Distribution of per501 score
+e_Year <- c(2012, 2013, 2014, 2015, 2016, 2017, 2018, 2019, 2020)
+e_per501 <- 0
+
+e_data <- data.frame(e_Year, e_per501)
+```
+
+```{r}
+##summary data
+for (i in 1:nrow(e_data)){
+  x <- e_Year[i]
+  e_data$e_per501[i] <- mean(my_data$gov_per501[my_data$Year == x], na.rm = T)
+}
+```
+```{r}
+ggplot(e_data, aes(x = e_Year, y = e_per501)) + 
+  geom_bar(stat = "identity") + 
+  labs(x = "Year", y = "Average government per501 score", title = "Trends in environmental policies over time")
+```
+
+```{r}
+##Climate finance
+c_Year <- c(2012, 2013, 2014, 2015, 2016, 2017, 2018, 2019, 2020)
+
+c_finance <- 0
+
+c_data <- data.frame(c_Year, c_finance)
+```
+
+```{r}
+##summary data
+for (i in 1:nrow(c_data)){
+  x <- c_Year[i]
+  c_data$c_finance[i] <- mean(my_data$climate_finance_adj_GDP_cap[my_data$Year == x], na.rm = T)
+}
+```
+```{r}
+ggplot(c_data, aes(x = c_Year, y = c_finance)) + 
+  geom_bar(stat = "identity") + 
+  labs(x = "Year", y = "Average climate finance spending %GDP per capita", title = "Trends in climate finance over time")
+```
+
+```{r}
+##By country
+d_country <- c(unique(my_data$Provider))
+
+d_finance <- 0
+
+d_data <- data.frame(d_country, d_finance)
+```
+
+```{r}
+##summary data
+for (i in 1:nrow(d_data)){
+  x <- d_data$d_country[i]
+  d_data$d_finance[i] <- mean(my_data$Climate.related.development.finance...Commitment...Current.USD.thousand[my_data$Provider == x], na.rm = T)/9#average annual climate finance
+}
+```
+
+
+```{r}
+ggplot(d_data, aes(x = d_finance, y = reorder(d_country, d_finance))) + 
+  geom_bar(stat = "identity") + 
+  labs(x = "Average annual climate finance spending (USD thousand)", y = "Country", title = "Annual climate finance by country 2012-2020")
+```
+
+```{r}
+##Countries with green parties
+f_country <- c(unique(my_data$Provider))
+
+f_green_party <- 0
+
+f_data <- data.frame(f_country, f_green_party)
+```
+
+```{r}
+print(unique(my_data$cabinet_name[my_data$green_party == 1]))
+```
+
+```{r}
+##summary data
+for (i in 1:nrow(f_data)){
+  x <- f_data$f_country[i]
+  y <- mean(my_data$green_party[my_data$Provider == x], na.rm = T)#has green party
+  if(y > 0){
+    f_data$f_green_party[i] <- 1
+  }
+}
+```
+
+```{r}
+##Countries with green parties
+ggplot(f_data, aes(x = f_green_party, y = f_country)) + 
+  geom_bar(stat = "identity") + 
+  labs(x = "Has the country had a green party in government", y = "Country", title = "Green parties in cabinet by country 2012-2020")
+```
+
+##Development minister
+
+Now we need to add the party of the development minister for each cabinet in each year. Then we will need to look-up the CMP number of the party to attach scores. We can do this by cross-referencing with cabinet 4_1.
+
+Variables for development minister could be the following:
+
+the party RILE score
+the party per501 score
+the party grouping as identified by manifesto
+
+##Manual addition of development minister
+
+Since we have to manually add in each development minister, we can simply do this in the government_key 4 csv file and then import this dataframe for the analysis.
+
+```{r}
+##Loading in new dataset
+gov_key_min <- read.csv("government_key_4_minister.csv")
+```
+
+```{r}
+##Loading cabinet 4_1
+cabinet_4_1 <- read.csv("cabinet_4_1.csv")
+```
+
+```{r}
+##Creating empty columns for development minister analysis
+gov_key_min$minister_cmp <- 0
+
+gov_key_min$minister_RILE <- 0
+
+gov_key_min$minister_per501 <- 0
+
+gov_key_min$minister_parfam <- 0
+
+gov_key_min <- gov_key_min %>% relocate(minister_cmp, .after=development_minister)
+
+gov_key_min <- gov_key_min %>% relocate(minister_RILE, .after=minister_cmp)
+
+gov_key_min <- gov_key_min %>% relocate(minister_per501, .after=minister_RILE)
+
+gov_key_min <- gov_key_min %>% relocate(minister_parfam, .after=minister_per501)
+```
+```{r}
+##Reformating dates
+gov_key_min$election_date <- strptime(as.character(gov_key_min$election_date), "%d/%m/%Y")
+```
+```{r}
+gov_key_min$election_date <- as.character(gov_key_min$election_date)
+```
+```{r}
+##Checking
+cabinet_4_1$election_date[1] == gov_key_min$election_date[1]
+```
+
+```{r}
+##Adding in party cmp scores for the minister's party
+for(i in 1:nrow(gov_key_min)){
+  x <- gov_key_min$development_minister[i]
+  y <- gov_key_min$election_date[i]
+  if(length(cabinet_4_1$party.cmp[cabinet_4_1$party_name == x & cabinet_4_1$election_date == y]) != 0){
+    gov_key_min$minister_cmp[i] <- cabinet_4_1$party.cmp[cabinet_4_1$party_name == x &   cabinet_4_1$election_date == y]
+  }
+}  
+```
+
+```{r}
+##Making independents have no party number
+gov_key_min$minister_cmp[gov_key_min$development_minister == "Independent"] <- NA
+```
+
+```{r}
+##Error checking
+print(gov_key_min$development_minister[gov_key_min$minister_cmp == 0])
+```
+
+```{r}
+##Corrections
+gov_key_min$development_minister[gov_key_min$development_minister == "Freie Demokratische Partei" & gov_key_min$election_date == "22/09/2013"] <- "Christlich Demokratische Union / Christlich Soziale Union"
+
+gov_key_min$minister_cmp[gov_key_min$development_minister == "Christlich Demokratische Union / Christlich Soziale Union" & gov_key_min$election_date == "22/09/2013"] <- 41521
+
+gov_key_min$development_minister[gov_key_min$development_minister == "Social Democratic Party | Moderates" & gov_key_min$election_date == "01/03/2015"] <- "Sotsiaaldemokraatlik Erakond | Mõõdukad"
+
+gov_key_min$minister_cmp[gov_key_min$development_minister == "Sotsiaaldemokraatlik Erakond | Mõõdukad" & gov_key_min$election_date == "01/03/2015"] <- 83410
+
+gov_key_min$development_minister[gov_key_min$development_minister == "Social Democratic Party | Moderates" & gov_key_min$election_date == "03/03/2019"] <- "Erakond Isamaa ja Res Publica Liit"
+
+gov_key_min$minister_cmp[gov_key_min$development_minister == "Erakond Isamaa ja Res Publica Liit" & gov_key_min$election_date == "03/03/2019"] <- 83611
+
+gov_key_min$development_minister[gov_key_min$development_minister == "Parti socialiste" & gov_key_min$election_date == "18/06/2017"] <- "Union pour un mouvement populaire | Les Républicains"
+
+gov_key_min$minister_cmp[gov_key_min$development_minister == "Union pour un mouvement populaire | Les Républicains" & gov_key_min$election_date == "18/06/2017"] <- 31624
+
+gov_key_min$development_minister[gov_key_min$development_minister == "Nuovo Centrodestra | Alternativa Popolare" & gov_key_min$election_date == "04/03/2018"] <- "Independent"
+
+gov_key_min$minister_cmp[gov_key_min$development_minister == "Independent" & gov_key_min$election_date == "04/03/2018"] <- NA
+
+gov_key_min$development_minister[gov_key_min$development_minister == "Sosialistisk Venstreparti" & gov_key_min$election_date == "09/09/2013"] <- "Høyre"
+
+gov_key_min$minister_cmp[gov_key_min$development_minister == "Høyre" & gov_key_min$election_date == "09/09/2013"] <- 12620
+```
+
+```{r}
+##Now we can add the respective minister RILE values to the government key
+for(i in 1:nrow(gov_key_min)){
+  x <- gov_key_min$development_minister[i]
+  y <- gov_key_min$election_date[i]
+  if(length(cabinet_4_1$RILE[cabinet_4_1$party_name == x & cabinet_4_1$election_date == y]) != 0){
+    gov_key_min$minister_RILE[i] <- cabinet_4_1$RILE[cabinet_4_1$party_name == x &   cabinet_4_1$election_date == y]
+  }
+}
+```
+
+```{r}
+##Same for minister per501 values
+for(i in 1:nrow(gov_key_min)){
+  x <- gov_key_min$development_minister[i]
+  y <- gov_key_min$election_date[i]
+  if(length(cabinet_4_1$per501[cabinet_4_1$party_name == x & cabinet_4_1$election_date == y]) != 0){
+    gov_key_min$minister_per501[i] <- cabinet_4_1$per501[cabinet_4_1$party_name == x &   cabinet_4_1$election_date == y]
+  }
+}  
+```
+
+```{r}
+##Same for minister parfam values
+for(i in 1:nrow(gov_key_min)){
+  x <- gov_key_min$development_minister[i]
+  y <- gov_key_min$election_date[i]
+  if(length(cabinet_4_1$parfam[cabinet_4_1$party_name == x & cabinet_4_1$election_date == y]) != 0){
+    gov_key_min$minister_parfam[i] <- cabinet_4_1$parfam[cabinet_4_1$party_name == x &   cabinet_4_1$election_date == y]
+  }
+}  
+```
+
+##Saving before something goes wrong
+```{r}
+write.csv(gov_key_min, "C:/Users/maxsk/Documents/UCL/Year 3/Dissertation/Data/gov_key_final.csv")
+```
+
+##Inserting values into the main dataset
+
+```{r}
+my_dataset <- my_data
+```
+
+```{r}
+##Creating empty columns
+my_dataset$minister_cmp <- 0
+
+my_dataset$minister_RILE <- 0
+
+my_dataset$minister_per501 <- 0
+
+my_dataset$minister_parfam <- 0
+
+my_dataset <- my_dataset %>% relocate(minister_cmp, .after=green_party)
+
+my_dataset <- my_dataset %>% relocate(minister_RILE, .after=minister_cmp)
+
+my_dataset <- my_dataset %>% relocate(minister_per501, .after=minister_RILE)
+
+my_dataset <- my_dataset %>% relocate(minister_parfam, .after=minister_per501)
+```
+
+```{r}
+##Adding values to columns
+for (i in 1:nrow(my_dataset)){
+  x <- my_dataset$Year[i]
+  y <- my_dataset$Provider[i]
+  
+  my_dataset$minister_cmp[i] <- gov_key_min$minister_cmp[gov_key_min$lagged_year == x & gov_key_min$country_name == y]
+  
+  my_dataset$minister_RILE[i] <- gov_key_min$minister_RILE[gov_key_min$lagged_year == x & gov_key_min$country_name == y]
+  
+  my_dataset$minister_per501[i] <- gov_key_min$minister_per501[gov_key_min$lagged_year == x & gov_key_min$country_name == y]
+  
+  my_dataset$minister_parfam[i] <- gov_key_min$minister_parfam[gov_key_min$lagged_year == x & gov_key_min$country_name == y]
+}
+```
+
+##Saving before something goes wrong
+```{r}
+write.csv(my_dataset, "C:/Users/maxsk/Documents/UCL/Year 3/Dissertation/Data/my_dataset.csv")
+```
+
+##Control variables
+
+Finally, we will add in control variables and re-estimate the models. The following control variables will be added:
+
+- Openness to trade
+- Recipient need
+- Governance indicators
+- Budget constraints
+
+These will all be sourced from the QOG dataset.
+
+```{r}
+##Loading QOG
+QOG <- read.csv("QOG.csv")
+```
+For controls, all refer to the recipient country in question. This presents an issue as some projects are not allocated to specific recipient countries:
+
+```{r}
+##Unspecified recipient countries
+my_dataset$recip_unspec <- 0
+
+my_dataset <- my_dataset %>% relocate(51, .after = 13)
+```
+```{r}
+##Calculating number
+my_dataset$recip_unspec[my_dataset$Recipient.Income.Group..OECD.Classification. == "Unallocated"] <- 1
+length(my_dataset$recip_unspec[my_dataset$recip_unspec == 1])
+```
+```{r}
+##Prop climate finance
+sum(my_dataset$climate_finance_adj_GDP_cap[my_dataset$recip_unspec == 1])/sum(my_dataset$climate_finance_adj_GDP_cap)
+```
+
+7920 projects have unspecified recipient countries. This represents 23% of climate finance in the dataset.
+
+##Missingness at random
+
+To ensure that these projects aren't correlated with the independent variable and are 'missing at random' we can run a regression to see whether missingness is associated with treatment.
+
+```{r}
+##Missing dataframe
+Country <- c(unique(my_dataset$Provider))
+Recip_unspecified <- data.frame(Country)
+Recip_unspecified$prop <- 0
+```
+```{r}
+##Proportion values
+for (i in 1:nrow(Recip_unspecified)){
+  Recip_unspecified$prop[i] <- sum(my_dataset$climate_finance_adj_GDP_cap[my_dataset$recip_unspec == 1 & my_dataset$Provider ==Recip_unspecified$Country[i]])/sum(my_dataset$climate_finance_adj_GDP_cap[my_dataset$Provider ==Recip_unspecified$Country[i]]) * 100  
+}
+```
+Unspecified recipients make up a large proportion of several countries' overall climate finance. Notably, it makes up 74% of the UK's climate finance, 85% Austria's, 80% Canada's and 99.9% of Greece's. It would, therefore, be impossible to simply remove these projects from the analysis, as we would miss out on valuable data points. 
+
+```{r}
+##Yearly breakdown
+Year <- c(2012, 2013, 2014, 2015, 2016, 2017, 2018, 2019, 2020)
+Year <- rep(Year, 9)
+Country <- 0
+prop <- 0
+rec_uns_year <- data.frame(Country, Year, prop)
+```
+```{r}
+prov <- c(unique(my_dataset$Provider))
+counter <- 1
+for (i in 1:nrow(rec_uns_year)){
+  rec_uns_year$Country[i] <- prov[counter]
+  if(rec_uns_year$Year[i] == 2020){
+    counter <- counter + 1
+  }
+}
+```
+```{r}
+##Proportion values
+for (i in 1:nrow(rec_uns_year)){
+  rec_uns_year$prop[i] <- sum(my_dataset$climate_finance_adj_GDP_cap[my_dataset$recip_unspec == 1 & my_dataset$Provider ==rec_uns_year$Country[i] & my_dataset$Year == rec_uns_year$Year[i]])/sum(my_dataset$climate_finance_adj_GDP_cap[my_dataset$Provider ==rec_uns_year$Country[i] & my_dataset$Year == rec_uns_year$Year[i]]) * 100  
+}
+```
+
+```{r}
+##Plot over time
+ggplot(rec_uns_year, aes(x = Year, y = prop, group = Country)) + 
+  geom_line(stat = "identity") + 
+  geom_path() +
+  labs(x = "Year", y = "Proportion", title = "Change in untagged climate finance")
+```
+```{r}
+##Compliers model
+my_data_compliers <- my_dataset[my_dataset$recip_unspec == 0,]
+```
+
+The proportion of climate finance spent without recipient tag varies each year.
+
+Run two separate models. One for overall dataset and one with recipient country controls. 
+
+##Openness to trade
+
+We are using 'freedom to trade internationally' from Economic freedom of the world dataset. The index provides a score of 0-10, where 0 is highest tax on trade and 10 is no tax on trade.
+
+Based on evidence such as Bethlemey (2006), where one motivation for ODA is countries give to their biggest trading partners. While these effects are less of a concern in this study, which is looking at levels of allocation rather than which countries receive finance, it may still be an effect we wish to cater for. 
+
+We cannot control for the trade openness of recipients, as many projects go to regional groups of countries (e.g. Oceania, Caribbean). However, as a proxy we can control for the trade openness of donor countries. Donor countries with higher openness to trade may be more incentivised to allocate finance based on trade openness.
+
+```{r}
+##Openness to trade values donor
+my_dataset$trade_openness_donor <- 0
+
+my_dataset <- my_dataset %>% relocate(51, .after = 13)
+```
+
+```{r}
+##Filling values from QOG
+for (i in 1:nrow(my_dataset)){
+  x <- my_dataset$Year[i]
+  y <- my_dataset$Provider[i]
+  my_dataset$trade_openness_donor[i] <- QOG$fi_ftradeint_pd[QOG$year == x-1 & QOG$cname == y]
+}
+length(my_dataset$trade_openness_donor[my_dataset$trade_openness_donor == 0])
+```
+
+```{r}
+##Trade openness for recipients
+efotw <- read.csv("efotw-2022.csv")
+```
+
+```{r}
+##List OECD recipients
+recipients_OECD <- c(unique(my_dataset$Recipient[my_dataset$recip_unspec == 0]))
+print(recipients_OECD)
+```
+
+```{r}
+##Checking for mismatches
+mismatches <- c()
+for (i in (recipients_OECD)){
+  x <- match(i, efotw$Countries, nomatch = 0)
+  if(x == 0){
+    mismatches <- c(mismatches, i)
+  }
+}
+print(mismatches)
+```
+
+```{r}
+##Changes to efotw
+efotw$Countries[efotw$Countries == "Vietnam"] <- "Viet Nam"
+
+efotw$Countries[efotw$Countries == "China"] <- "China (People's Republic of)"
+
+efotw$Countries[efotw$Countries == "Lao PDR"] <- "Lao People's Democratic Republic"
+
+efotw$Countries[efotw$Countries == "Congo, Dem. Rep."] <- "Democratic Republic of the Congo"
+
+efotw$Countries[efotw$Countries == "Cote d'Ivoire"] <- "Côte d'Ivoire"
+
+efotw$Countries[efotw$Countries == "Egypt, Arab Rep."] <- "Egypt"
+
+efotw$Countries[efotw$Countries == "Congo, Rep."] <- "Congo"
+
+efotw$Countries[efotw$Countries == "Kyrgyz Republic"] <- "Kyrgyzstan"
+
+efotw$Countries[efotw$Countries == "Iran, Islamic Rep."] <- "Iran"
+
+efotw$Countries[efotw$Countries == "Gambia, The"] <- "Gambia"
+
+efotw$Countries[efotw$Countries == "Venezuela, RB"] <- "Venezuela"
+
+efotw$Countries[efotw$Countries == "Yemen, Rep."] <- "Yemen"
+```
+
+```{r}
+##Openness to trade values recipient
+my_dataset$trade_openness_recip <- 0
+
+my_dataset <- my_dataset %>% relocate(18, .after = 16)
+```
+
+```{r}
+##NA for no country values
+my_dataset$trade_openness_recip[my_dataset$recip_unspec == 1] <- NA
+```
+
+```{r}
+##Filling values from efotw
+for (i in 1:nrow(my_dataset)){
+  x <- my_dataset$Year[i]
+  y <- my_dataset$Recipient[i]
+  if(length(efotw$Area.4[efotw$Year == x-1 & efotw$Countries == y]) != 0){
+    my_dataset$trade_openness_recip[i] <- efotw$Area.4[efotw$Year == x-1 & efotw$Countries == y]
+  }
+}
+length(my_dataset$trade_openness_recip[is.na(my_dataset$trade_openness_recip) == TRUE & my_dataset$recip_unspec == 0])
+```
+
+There are 1430 observations for which we have no trade openness data.
+
+
+```{r}
+##Changing missing scores to NA
+my_dataset$trade_openness_recip[my_dataset$trade_openness_recip == 0] <- NA
+```
+
+```{r}
+##Saving so do not have to repeat name changes
+write.csv(efotw, "C:/Users/maxsk/Documents/UCL/Year 3/Dissertation/Data/efotw-2022.csv")
+```
+
+##Recipient need
+
+Recipient need can be captured by two variables. CO2 intensity can capture the needs for mitigation finance, and vulnerability (measured by ND-GAIN) can assess need for adaptation finance.
+
+CO2 emissions are captured in QOG as CO2 emissions in metric tons per capita.
+
+```{r}
+##CO2 per capita
+my_dataset$CO2_intensity <- 0
+
+my_dataset <- my_dataset %>% relocate(19, .after = 17)
+```
+
+```{r}
+##Loading in world bank data
+CO2 <- read.csv("CO2_wb.csv")
+```
+
+```{r}
+##Mismatch all
+recipients_all <- c(unique(my_dataset$Recipient))
+print(recipients_all)
+```
+
+```{r}
+##Checking for mismatches
+mismatches <- c()
+for (i in (recipients_all)){
+  x <- match(i, CO2$ï..Country.Name, nomatch = 0)
+  if(x == 0){
+    mismatches <- c(mismatches, i)
+  }
+}
+print(mismatches)
+```
+
+
+```{r}
+##Correcting mismatches
+CO2$ï..Country.Name[CO2$ï..Country.Name == "Vietnam"] <- "Viet Nam"
+
+CO2$ï..Country.Name[CO2$ï..Country.Name == "Turkiye"] <- "Turkey"
+
+CO2$ï..Country.Name[CO2$ï..Country.Name == "Lao PDR"] <- "Lao People's Democratic Republic"
+
+CO2$ï..Country.Name[CO2$ï..Country.Name == "Cote d'Ivoire"] <- "Côte d'Ivoire"
+
+CO2$ï..Country.Name[CO2$ï..Country.Name == "Congo, Rep."] <- "Congo"
+
+CO2$ï..Country.Name[CO2$ï..Country.Name == "Iran, Islamic Rep."] <- "Iran"
+
+CO2$ï..Country.Name[CO2$ï..Country.Name == "Gambia, The"] <- "Gambia"
+
+CO2$ï..Country.Name[CO2$ï..Country.Name == "Venezuela, RB"] <- "Venezuela"
+
+CO2$ï..Country.Name[CO2$ï..Country.Name == "China"] <- "China (People's Republic of)"
+
+CO2$ï..Country.Name[CO2$ï..Country.Name == "Congo, Dem. Rep."] <- "Democratic Republic of the Congo"
+
+CO2$ï..Country.Name[CO2$ï..Country.Name == "Egypt, Arab Rep."] <- "Egypt"
+
+CO2$ï..Country.Name[CO2$ï..Country.Name == "Kyrgyz Republic"] <- "Kyrgyzstan"
+
+CO2$ï..Country.Name[CO2$ï..Country.Name == "Korea, Dem. People's Rep."] <- "Democratic People's Republic of Korea"
+
+CO2$ï..Country.Name[CO2$ï..Country.Name == "Yemen, Rep."] <- "Yemen"
+```
+
+
+```{r}
+##Filling values from CO2
+for (i in 1:nrow(my_dataset)){
+  x <- my_dataset$Year[i]
+  y <- my_dataset$Recipient[i]
+  if(length(CO2$Emissions[CO2$Year == x-1 & CO2$ï..Country.Name == y]) != 0){
+    my_dataset$CO2_intensity[i] <- CO2$Emissions[CO2$Year == x-1 & CO2$ï..Country.Name == y]
+  }
+}
+```
+
+```{r}
+##Check
+length(my_dataset$CO2_intensity[my_dataset$CO2_intensity == 0 & my_dataset$recip_unspec == 0])
+```
+
+278 missing observations.
+
+```{r}
+##Making missing observations NA
+my_dataset$CO2_intensity[my_dataset$CO2_intensity == 0] <- NA
+```
+
+##Saving before something goes wrong
+```{r}
+write.csv(my_dataset, "C:/Users/maxsk/Documents/UCL/Year 3/Dissertation/Data/my_dataset.csv")
+```
+
+##ND GAIN
+
+```{r}
+##Loading vulnerability data
+Vul <- read.csv("vulnerability.csv")
+```
+
+```{r}
+##Checking for mismatches
+mismatches <- c()
+for (i in (recipients_OECD)){
+  x <- match(i, Vul$Name, nomatch = 0)
+  if(x == 0){
+    mismatches <- c(mismatches, i)
+  }
+}
+print(mismatches)
+```
+
+```{r}
+##Correcting mismatches
+
+Vul$Name[Vul$Name == "China"] <- "China (People's Republic of)"
+
+Vul$Name[Vul$Name == "Moldova, Republic of"] <- "Moldova"
+
+Vul$Name[Vul$Name == "Congo, the Democratic Republic o"] <- "Democratic Republic of the Congo"
+
+Vul$Name[Vul$Name == "Bolivia, Plurinational State of"] <- "Bolivia"
+
+Vul$Name[Vul$Name == "Iran, Islamic Republic of"] <- "Iran"
+
+Vul$Name[Vul$Name == "Venezuela, Bolivarian Republic o"] <- "Venezuela"
+
+Vul$Name[Vul$Name == "Micronesia, Federated States of"] <- "Micronesia"
+
+Vul$Name[Vul$Name == "Tanzania, United Republic of"] <- "Tanzania"
+
+Vul$Name[Vul$Name == "Cote d'Ivoire"] <- "Côte d'Ivoire"
+
+Vul$Name[Vul$Name == "Cape Verde"] <- "Cabo Verde"
+
+Vul$Name[Vul$Name == "Macedonia"] <- "North Macedonia"
+
+Vul$Name[Vul$Name == "Korea, Democratic People's Repub"] <- "Democratic People's Republic of Korea"
+
+Vul$Name[Vul$Name == "Libyan Arab Jamahiriya"] <- "Libya"
+
+Vul$Name[Vul$Name == "Swaziland"] <- "Eswatini"
+```
+
+
+```{r}
+##Vulnerability
+#From ND_GAIN. Lower score means more vulnerable.
+
+my_dataset$Vulnerability <- 0
+
+my_dataset <- my_dataset %>% relocate(55, .after = 18)
+```
+
+
+```{r}
+##Filling values from NDGAIN
+for (i in 1:nrow(my_dataset)){
+  x <- my_dataset$Year[i]
+  y <- my_dataset$Recipient[i]
+  if(length(Vul$Vulnerability[Vul$Year == x-1 & Vul$Name == y]) != 0){
+    my_dataset$Vulnerability[i] <- Vul$Vulnerability[Vul$Year == x-1 & Vul$Name == y]
+  }
+}
+```
+
+```{r}
+##Check
+length(my_dataset$Vulnerability[my_dataset$Vulnerability == 0 & my_dataset$recip_unspec == 0])
+```
+
+488 missing observations.
+
+```{r}
+##Making missing observations NA
+my_dataset$Vulnerability[my_dataset$Vulnerability == 0] <- NA
+```
+
+##World governance indicators
+
+I am taking an sum of 6 world governance indicators.
+
+```{r}
+##Loading WGI
+WGI <- read.csv("WGI.csv")
+```
+
+```{r}
+##Checking for mismatches
+mismatches <- c()
+for (i in (recipients_OECD)){
+  x <- match(i, WGI$Country, nomatch = 0)
+  if(x == 0){
+    mismatches <- c(mismatches, i)
+  }
+}
+print(mismatches)
+```
+
+```{r}
+##Correcting mismathes
+
+WGI$Country[WGI$Country == "Vietnam"] <- "Viet Nam"
+
+WGI$Country[WGI$Country == "Turkiye"] <- "Turkey"
+
+WGI$Country[WGI$Country == "Lao PDR"] <- "Lao People's Democratic Republic"
+
+WGI$Country[WGI$Country == "Cote d'Ivoire"] <- "Côte d'Ivoire"
+
+WGI$Country[WGI$Country == "Congo, Rep."] <- "Congo"
+
+WGI$Country[WGI$Country == "Iran, Islamic Rep."] <- "Iran"
+
+WGI$Country[WGI$Country == "Gambia, The"] <- "Gambia"
+
+WGI$Country[WGI$Country == "Venezuela, RB"] <- "Venezuela"
+
+WGI$Country[WGI$Country == "China"] <- "China (People's Republic of)"
+
+WGI$Country[WGI$Country == "Micronesia, Fed. Sts."] <- "Micronesia"
+
+WGI$Country[WGI$Country == "Congo, Dem. Rep."] <- "Democratic Republic of the Congo"
+
+WGI$Country[WGI$Country == "Egypt, Arab Rep."] <- "Egypt"
+
+WGI$Country[WGI$Country == "Kyrgyz Republic"] <- "Kyrgyzstan"
+
+WGI$Country[WGI$Country == "West Bank and Gaza"] <- "West Bank and Gaza Strip"
+
+WGI$Country[WGI$Country == "Korea, Dem. People's Rep."] <- "Democratic People's Republic of Korea"
+
+WGI$Country[WGI$Country == "Yemen, Rep."] <- "Yemen"
+```
+
+```{r}
+##WGI
+my_dataset$WGI <- 0
+
+my_dataset <- my_dataset %>% relocate(56, .after = 19)
+```
+
+```{r}
+##Filling values from WGI
+for (i in 1:nrow(my_dataset)){
+  x <- my_dataset$Year[i]
+  y <- my_dataset$Recipient[i]
+  if(length(WGI$WGI[WGI$Year == x-1 & WGI$Country == y]) != 0){
+    my_dataset$WGI[i] <- WGI$WGI[WGI$Year == x-1 & WGI$Country == y]
+  }
+}
+```
+
+```{r}
+##Check
+length(my_dataset$WGI[my_dataset$WGI == 0 & my_dataset$recip_unspec == 0])
+```
+
+38 missing observations.
+
+```{r}
+##Making missing observations NA
+my_dataset$WGI[my_dataset$WGI == 0] <- NA
+```
+
+##Budgetary contraints: debt
+
+Using data from World bank debt-GDP.
+
+```{r}
+##Loading debt dataset
+debt <- read.csv("debt.csv")
+```
+
+```{r}
+##Checking for mismatches
+donor_OECD <- c(unique(my_dataset$Provider))
+mismatches <- c()
+for (i in (donor_OECD)){
+  x <- match(i, debt$ï..Country.Name, nomatch = 0)
+  if(x == 0){
+    mismatches <- c(mismatches, i)
+  }
+}
+print(mismatches)
+```
+```{r}
+##Corrections
+debt$ï..Country.Name[debt$ï..Country.Name == "Czechia"] <- "Czech Republic"
+
+debt$ï..Country.Name[debt$ï..Country.Name == "Korea, Rep."] <- "Republic of Korea"
+
+debt$ï..Country.Name[debt$ï..Country.Name == "United States"] <- "United States of America"
+
+debt$ï..Country.Name[debt$ï..Country.Name == "Slovak Republic"] <- "Slovakia"
+```
+
+
+```{r}
+##debt
+my_dataset$debt_GDP <- 0
+
+my_dataset <- my_dataset %>% relocate(57, .after = 15)
+```
+
+```{r}
+##Filling values from QOG
+for (i in 1:nrow(my_dataset)){
+  x <- my_dataset$Year[i]
+  y <- my_dataset$Provider[i]
+  if(length(QOG$oecd_govdebt_t1[QOG$year == x-1 & QOG$cname == y]) != 0){
+    my_dataset$debt_GDP[i] <- QOG$oecd_govdebt_t1[QOG$year == x-1 & QOG$cname == y]
+  }
+}
+```
+
+```{r}
+##Check
+length(my_dataset$debt_GDP[my_dataset$debt_GDP == 0])
+```
+
+6733 missing observations. (Fewer than using world bank data)
+
+```{r}
+##Making missing observations NA
+my_dataset$debt_GDP[my_dataset$debt_GDP == 0] <- NA
+```
+##Responsibility
+
+Building from Klock et al. that donors with higher emissions give more finance due to 'responsibility' arguments.
+
+```{r}
+CO2 <- read.csv("CO2_wb.csv")
+```
+
+```{r}
+##CO2 donor
+my_dataset$CO_2_donor <- 0
+
+my_dataset <- my_dataset %>% relocate(58, .after = 15)
+```
+```{r}
+##Checking for mismatches
+donor_OECD <- c(unique(my_dataset$Provider))
+mismatches <- c()
+for (i in (donor_OECD)){
+  x <- match(i, CO2$ï..Country.Name, nomatch = 0)
+  if(x == 0){
+    mismatches <- c(mismatches, i)
+  }
+}
+print(mismatches)
+```
+```{r}
+##Corrections
+CO2$ï..Country.Name[CO2$ï..Country.Name == "Czechia"] <- "Czech Republic"
+
+CO2$ï..Country.Name[CO2$ï..Country.Name == "Korea, Rep."] <- "Republic of Korea"
+
+CO2$ï..Country.Name[CO2$ï..Country.Name == "United States"] <- "United States of America"
+
+CO2$ï..Country.Name[CO2$ï..Country.Name == "Slovak Republic"] <- "Slovakia"
+```
+
+```{r}
+##Filling values from CO2
+for (i in 1:nrow(my_dataset)){
+  x <- my_dataset$Year[i]
+  y <- my_dataset$Provider[i]
+  if(length(CO2$Emissions[CO2$Year == x-1 & CO2$ï..Country.Name == y]) != 0){
+    my_dataset$CO_2_donor[i] <- CO2$Emissions[CO2$Year == x-1 & CO2$ï..Country.Name == y]
+  }
+}
+```
+```{r}
+##Check
+length(my_dataset$CO_2_donor[my_dataset$CO_2_donor == 0])
+```
+
+No missing observations for donor CO2 intensity,
+
+##Saving before something goes wrong
+```{r}
+write.csv(my_dataset, "C:/Users/maxsk/Documents/UCL/Year 3/Dissertation/Data/my_dataset.csv")
+```
+
+##Model 1: whole dataset
+
+```{r}
+##Libraries
+library(plm)
+library(AER)
+library(stargazer)#cite stargazer?
+library(rlang)
+library(tidyverse)
+```
+```{r}
+my_dataset_compliers <- my_dataset[my_dataset$recip_unspec == 0,]
+```
+```{r}
+##WGI character
+class(my_dataset_compliers$WGI[2])
+```
+```{r}
+##Changing to integer
+my_dataset_compliers$WGI <- as.numeric(my_dataset_compliers$WGI)
+
+```
+```{r}
+##WGI character
+class(my_dataset_compliers$WGI[2])
+```
+
+```{r}
+my_dataset_small_compliers <-
+  my_dataset_compliers %>% # refer to the fae_all data frame
+  group_by(Provider,Year) %>% # tell R the unique ID
+  summarize(climate_finance_adj_GDP_cap = sum(climate_finance_adj_GDP_cap, na.rm=TRUE)) # summarize
+```
+
+```{r}
+##Adding in rest of columns
+col_names <- c("cabinet_name", "gov_RILE", "gov_per501", "green_party", "minister_cmp", "minister_RILE", "minister_per501", "minister_parfam", "green_minister", "cab_start_year", "CO_2_donor", "debt_GDP", "trade_openness_donor", "trade_openness_recip", "CO2_intensity", "Vulnerability", "WGI", "GDP_capita")
+
+my_dataset_small_compliers[col_names] <- 0
+```
+
+```{r}
+##Filling values for new dataframe
+for (i in 1:nrow(my_dataset_small_compliers)){
+  x <- my_dataset_small_compliers$Provider[i]
+  y <- my_dataset_small_compliers$Year[i]
+  my_dataset_small_compliers$cabinet_name[i] <- my_dataset_compliers$cabinet_name[my_dataset_compliers$Provider == x & my_dataset_compliers$Year == y]
+  
+  my_dataset_small_compliers$gov_RILE[i] <- my_dataset_compliers$gov_RILE[my_dataset_compliers$Provider == x & my_dataset_compliers$Year == y]
+  
+  my_dataset_small_compliers$gov_per501[i] <- my_dataset_compliers$gov_per501[my_dataset_compliers$Provider == x & my_dataset_compliers$Year == y]
+  
+  my_dataset_small_compliers$green_party[i] <- my_dataset_compliers$green_party[my_dataset_compliers$Provider == x & my_dataset_compliers$Year == y]
+  
+  my_dataset_small_compliers$minister_cmp[i] <- my_dataset_compliers$minister_cmp[my_dataset_compliers$Provider == x & my_dataset_compliers$Year == y]
+  
+  my_dataset_small_compliers$minister_RILE[i] <- my_dataset_compliers$minister_RILE[my_dataset_compliers$Provider == x & my_dataset_compliers$Year == y]
+  
+  my_dataset_small_compliers$minister_per501[i] <- my_dataset_compliers$minister_per501[my_dataset_compliers$Provider == x & my_dataset_compliers$Year == y]
+  
+  my_dataset_small_compliers$minister_parfam[i] <- my_dataset_compliers$minister_parfam[my_dataset_compliers$Provider == x & my_dataset_compliers$Year == y]
+  
+  #my_dataset_small_compliers$green_minister[i] <- my_dataset_compliers$green_minister[my_dataset_compliers$Provider == x & my_dataset_compliers$Year == y]
+  
+  my_dataset_small_compliers$cab_start_year[i] <- my_dataset_compliers$cab_start_year[my_dataset_compliers$Provider == x & my_dataset_compliers$Year == y]
+  
+  my_dataset_small_compliers$CO_2_donor[i] <- my_dataset_compliers$CO_2_donor[my_dataset_compliers$Provider == x & my_dataset_compliers$Year == y]
+  
+  my_dataset_small_compliers$debt_GDP[i] <- my_dataset_compliers$debt_GDP[my_dataset_compliers$Provider == x & my_dataset_compliers$Year == y]
+  
+  my_dataset_small_compliers$trade_openness_donor[i] <- my_dataset_compliers$trade_openness_donor[my_dataset_compliers$Provider == x & my_dataset_compliers$Year == y]
+  
+  my_dataset_small_compliers$GDP_capita[i] <- my_dataset_compliers$GDP_capita[my_dataset_compliers$Provider == x & my_dataset_compliers$Year == y]
+}
+```
+```{r}
+##Filling in average recipient values
+for (i in 1:nrow(my_dataset_small_compliers)){
+  x <- my_dataset_small_compliers$Provider[i]
+  y <- my_dataset_small_compliers$Year[i]
+  
+  my_dataset_small_compliers$trade_openness_recip[i] <- mean(my_dataset_compliers$trade_openness_recip[my_dataset_compliers$Provider == x & my_dataset_compliers$Year == y], na.rm = T)
+  
+  my_dataset_small_compliers$CO2_intensity[i] <- mean(my_dataset_compliers$CO2_intensity[my_dataset_compliers$Provider == x & my_dataset_compliers$Year == y], na.rm = T)
+  
+  my_dataset_small_compliers$Vulnerability[i] <- mean(my_dataset_compliers$Vulnerability[my_dataset_compliers$Provider == x & my_dataset_compliers$Year == y], na.rm = T)
+  
+  my_dataset_small_compliers$WGI[i] <- mean(my_dataset_compliers$WGI[my_dataset_compliers$Provider == x & my_dataset_compliers$Year == y], na.rm = T)
+}
+```
+
+##Saving before something goes wrong
+```{r}
+write.csv(my_dataset_small_compliers, "C:/Users/maxsk/Documents/UCL/Year 3/Dissertation/Data/my_dataset_small_compliers.csv")
+```
+```{r}
+my_dataset_small <-
+  my_dataset %>% # refer to the fae_all data frame
+  group_by(Provider,Year) %>% # tell R the unique ID
+  summarize(climate_finance_adj_GDP_cap = sum(climate_finance_adj_GDP_cap, na.rm=TRUE)) # summarize
+```
+
+```{r}
+##Adding in rest of columns
+col_names <- c("cabinet_name", "gov_RILE", "gov_per501", "green_party", "minister_cmp", "minister_RILE", "minister_per501", "minister_parfam", "green_minister", "cab_start_year", "CO_2_donor", "debt_GDP", "trade_openness_donor", "GDP_capita")
+
+my_dataset_small[col_names] <- 0
+```
+
+```{r}
+##Filling values for new dataframe
+for (i in 1:nrow(my_dataset_small)){
+  x <- my_dataset_small$Provider[i]
+  y <- my_dataset_small$Year[i]
+  my_dataset_small$cabinet_name[i] <- my_dataset$cabinet_name[my_dataset$Provider == x & my_dataset$Year == y]
+  
+  my_dataset_small$gov_RILE[i] <- my_dataset$gov_RILE[my_dataset$Provider == x & my_dataset$Year == y]
+  
+  my_dataset_small$gov_per501[i] <- my_dataset$gov_per501[my_dataset$Provider == x & my_dataset$Year == y]
+  
+  my_dataset_small$green_party[i] <- my_dataset$green_party[my_dataset$Provider == x & my_dataset$Year == y]
+  
+  my_dataset_small$minister_cmp[i] <- my_dataset$minister_cmp[my_dataset$Provider == x & my_dataset$Year == y]
+  
+  my_dataset_small$minister_RILE[i] <- my_dataset$minister_RILE[my_dataset$Provider == x & my_dataset$Year == y]
+  
+  my_dataset_small$minister_per501[i] <- my_dataset$minister_per501[my_dataset$Provider == x & my_dataset$Year == y]
+  
+  my_dataset_small$minister_parfam[i] <- my_dataset$minister_parfam[my_dataset$Provider == x & my_dataset$Year == y]
+  
+  #my_dataset_small_compliers$green_minister[i] <- my_dataset_compliers$green_minister[my_dataset_compliers$Provider == x & my_dataset_compliers$Year == y]
+  
+  my_dataset_small$cab_start_year[i] <- my_dataset$cab_start_year[my_dataset$Provider == x & my_dataset$Year == y]
+  
+  my_dataset_small$CO_2_donor[i] <- my_dataset$CO_2_donor[my_dataset$Provider == x & my_dataset$Year == y]
+  
+  my_dataset_small$debt_GDP[i] <- my_dataset$debt_GDP[my_dataset$Provider == x & my_dataset$Year == y]
+  
+  my_dataset_small$trade_openness_donor[i] <- my_dataset$trade_openness_donor[my_dataset$Provider == x & my_dataset$Year == y]
+  
+  my_dataset_small$GDP_capita[i] <- my_dataset$GDP_capita[my_dataset$Provider == x & my_dataset$Year == y]
+}
+```
+
+##Pooled OLS
+
+```{r}
+library(stargazer)
+library(AER)
+library(plm)
+```
+```{r}
+print(my_dataset_small$cabinet_name[is.na(my_dataset_small$gov_RILE) == TRUE])
+
+print(is.na(my_dataset_small$gov_RILE) == TRUE)
+```
+
+```{r}
+##Donor controls CO2 per capita, trade openness
+pool_1 <- plm(climate_finance_adj_GDP_cap ~ gov_RILE + CO_2_donor + trade_openness_donor, data = my_dataset_small, index = c("Provider", "Year"), effect = "twoways", model = "pooling")
+```
+```{r}
+summary(pool_1)
+```
+
+```{r}
+## All donor controls
+pool_2 <- plm(climate_finance_adj_GDP_cap ~ gov_per501 + CO_2_donor + trade_openness_donor, data = my_dataset_small, index = c("Provider", "Year"), effect = "twoways", model = "pooling")
+```
+```{r}
+## All donor controls
+pool_3 <- plm(climate_finance_adj_GDP_cap ~ green_party + CO_2_donor + trade_openness_donor, data = my_dataset_small, index = c("Provider", "Year"), effect = "twoways", model = "pooling")
+```
+```{r}
+## All donor controls
+pool_4 <- plm(climate_finance_adj_GDP_cap ~ minister_RILE + CO_2_donor + trade_openness_donor, data = my_dataset_small, index = c("Provider", "Year"), effect = "twoways", model = "pooling")
+```
+```{r}
+## All donor controls
+pool_5 <- plm(climate_finance_adj_GDP_cap ~ minister_per501 + CO_2_donor + trade_openness_donor, data = my_dataset_small, index = c("Provider", "Year"), effect = "twoways", model = "pooling")
+```
+
+```{r}
+##Recipient controls only
+pool_6 <- plm(climate_finance_adj_GDP_cap ~ gov_RILE + CO_2_donor + trade_openness_recip + CO2_intensity + Vulnerability + WGI, data = my_dataset_small_compliers, index = c("Provider", "Year"), effect = "twoways", model = "pooling")
+```
+```{r}
+##Recipient controls
+pool_7 <- plm(climate_finance_adj_GDP_cap ~ gov_per501 + CO_2_donor + trade_openness_recip + CO2_intensity + Vulnerability + WGI, data = my_dataset_small_compliers, index = c("Provider", "Year"), effect = "twoways", model = "pooling")
+```
+```{r}
+##All controls
+pool_8 <- plm(climate_finance_adj_GDP_cap ~ green_party + CO_2_donor + trade_openness_recip + CO2_intensity + Vulnerability + WGI, data = my_dataset_small_compliers, index = c("Provider", "Year"), effect = "twoways", model = "pooling")
+```
+```{r}
+##All controls
+pool_9 <- plm(climate_finance_adj_GDP_cap ~ minister_RILE + CO_2_donor + trade_openness_recip + CO2_intensity + Vulnerability + WGI, data = my_dataset_small_compliers, index = c("Provider", "Year"), effect = "twoways", model = "pooling")
+```
+```{r}
+##All controls
+pool_10 <- plm(climate_finance_adj_GDP_cap ~ minister_per501 + CO_2_donor + trade_openness_recip + CO2_intensity + Vulnerability + WGI, data = my_dataset_small_compliers, index = c("Provider", "Year"), effect = "twoways", model = "pooling")
+```
+
+```{r}
+##Regression table
+stargazer(pool_1, pool_2, pool_3, pool_4, pool_5,pool_6, pool_7, pool_8, pool_9, pool_10, out = "TAB10.htm")
+```
+
+###Fixed effects models
+
+```{r}
+##Donor controls CO2 per capita, trade openness
+fixed_1 <- plm(climate_finance_adj_GDP_cap ~ gov_RILE + CO_2_donor + trade_openness_donor, data = my_dataset_small, index = c("Provider", "Year"), effect = "twoways")
+```
+
+```{r}
+## All donor controls
+fixed_2 <- plm(climate_finance_adj_GDP_cap ~ gov_per501 + CO_2_donor + trade_openness_donor, data = my_dataset_small, index = c("Provider", "Year"), effect = "twoways")
+```
+```{r}
+## All donor controls
+fixed_3 <- plm(climate_finance_adj_GDP_cap ~ green_party + CO_2_donor + trade_openness_donor, data = my_dataset_small, index = c("Provider", "Year"), effect = "twoways")
+```
+```{r}
+## All donor controls
+fixed_4 <- plm(climate_finance_adj_GDP_cap ~ minister_RILE + CO_2_donor + trade_openness_donor, data = my_dataset_small, index = c("Provider", "Year"), effect = "twoways")
+```
+```{r}
+## All donor controls
+fixed_5 <- plm(climate_finance_adj_GDP_cap ~ minister_per501 + CO_2_donor + trade_openness_donor, data = my_dataset_small, index = c("Provider", "Year"), effect = "twoways")
+```
+
+
+```{r}
+##Recipient controls only
+fixed_6 <- plm(climate_finance_adj_GDP_cap ~ gov_RILE + CO_2_donor + trade_openness_recip + CO2_intensity + Vulnerability + WGI, data = my_dataset_small_compliers, index = c("Provider", "Year"), effect = "twoways")
+```
+```{r}
+##Recipient controls only
+fixed_7 <- plm(climate_finance_adj_GDP_cap ~ gov_per501 + CO_2_donor + trade_openness_recip + CO2_intensity + Vulnerability + WGI, data = my_dataset_small_compliers, index = c("Provider", "Year"), effect = "twoways")
+```
+```{r}
+##Recipient controls only
+fixed_8 <- plm(climate_finance_adj_GDP_cap ~ green_party + CO_2_donor + trade_openness_recip + CO2_intensity + Vulnerability + WGI, data = my_dataset_small_compliers, index = c("Provider", "Year"), effect = "twoways")
+```
+```{r}
+##Recipient controls only
+fixed_9 <- plm(climate_finance_adj_GDP_cap ~ minister_RILE + CO_2_donor + trade_openness_recip + CO2_intensity + Vulnerability + WGI, data = my_dataset_small_compliers, index = c("Provider", "Year"), effect = "twoways")
+```
+```{r}
+##Recipient controls only
+fixed_10 <- plm(climate_finance_adj_GDP_cap ~ minister_per501 + CO_2_donor + trade_openness_recip + CO2_intensity + Vulnerability + WGI, data = my_dataset_small_compliers, index = c("Provider", "Year"), effect = "twoways")
+```
+
+```{r}
+##Fixed effects regression table
+stargazer(fixed_1, fixed_2, fixed_3, fixed_4, fixed_5,fixed_6, fixed_7, fixed_8, fixed_9, fixed_10, out = "TAB11.htm")
+```
+
+##Ministers
+
+```{r}
+##Number of green parties
+print(unique(my_dataset$cabinet_name[my_dataset$green_minister== 1]))
+```
+Only 5 cabinets with green development ministers.
+
+
+```{r}
+##Number of green parties in cabinet
+length(my_dataset_small$Provider[my_dataset_small$green_party == 1])
+```
+23 Green parties out of 240 cabinets
+
+```{r}
+##Countries green parties
+my_dataset_small$Provider[my_dataset_small$green_party == 1]
+```
+
+##Climate finance by country plot
+
+```{r}
+##Adding absolute spending
+my_dataset_small_2 <- my_dataset_small
+
+my_dataset_small_2$climate_spend <- my_dataset_small_2$climate_finance_adj_GDP_cap * my_dataset_small_2$GDP_capita
+
+my_dataset_small_2$climate_spend <- format(my_dataset_small_2$climate_spend, scientific = FALSE)
+
+my_dataset_small_2$climate_spend <- as.numeric(my_dataset_small_2$climate_spend)
+
+my_dataset_small_2$climate_spend <- my_dataset_small_2$climate_spend/1000
+
+```
+
+
+```{r}
+ggplot(my_dataset_small_2, aes(x = climate_spend, y = reorder(Provider, climate_spend), fill = Provider)) + 
+  geom_bar(stat = "identity") + 
+  labs(x = "Total climate finance spending (USD Millions)", y = "Country", title = "Total climate finance by country 2012-2020") + 
+  theme(axis.title = element_text(size=10))+
+  theme(legend.position = "none")+
+  scale_fill_hue(l=40, c=35)
+  
+```
+
+##Bubble plot
+
+```{r}
+library(ggplot2)
+```
+
+```{r}
+##Top 6 donor dataset
+top_6 <- my_dataset_small[my_dataset_small$Provider == "France"|my_dataset_small$Provider == "Germany"|my_dataset_small$Provider =="Japan"|my_dataset_small$Provider =="United States of America"|my_dataset_small$Provider =="United Kingdom"|my_dataset_small$Provider =="Norway",]
+
+```
+
+```{r}
+##Baseline bubble
+ggplot(top_6, aes(x = Year, y = gov_RILE, size = climate_finance_adj_GDP_cap)) +
+  geom_point(alpha = 0.7)
+```
+
+```{r fig.height=12, fig.width=18}
+##gov_RILE bubble
+ggplot(top_6, aes(x = Year, y = gov_RILE, size = climate_finance_adj_GDP_cap)) + 
+  geom_line(size=0.5, color = "darkgrey")+
+  geom_point(data=top_6,aes(x = Year,y = gov_RILE, size = climate_finance_adj_GDP_cap,color=Provider))+
+  labs(title = "Government left-right ideology (gov_RILE) and climate finance commitments for top 6 donor countries")+
+  theme(title = element_text(size = 15))+
+  theme(legend.title=element_text(size=8), legend.text = element_text(size=8))+
+  guides(color = FALSE)+
+   scale_size(range = c(.1, 20), name="Climate Finance Spending/GDP per capita (USD Thousands)")+
+ facet_wrap(~factor(Provider, c("France", "Germany", "Japan", "United States of America", "United Kingdom", "Norway")), ncol = 2, nrow = 3) 
+```
+```{r fig.height=12, fig.width=18}
+##minister_RILE bubble
+ggplot(top_6, aes(x = Year, y = minister_RILE, size = climate_finance_adj_GDP_cap)) + 
+  geom_line(size=0.5, color = "darkgrey")+
+  geom_point(data=top_6,aes(x = Year,y = minister_RILE, size = climate_finance_adj_GDP_cap,color=Provider))+
+  labs(title = "Minister left-right ideology (minister_RILE) and climate finance commitments for top 6 donor countries")+
+  theme(title = element_text(size = 15))+
+  theme(legend.title=element_text(size=8), legend.text = element_text(size=8))+
+  guides(color = FALSE)+
+   scale_size(range = c(.1, 20), name="Climate Finance Spending/GDP per capita (USD Thousands)")+
+ facet_wrap(~factor(Provider, c("France", "Germany", "Japan", "United States of America", "United Kingdom", "Norway")), ncol = 2, nrow = 3) 
+```
+
+```{r fig.width=10, fig.height=5}
+##RILE finance trend
+ggplot(data = my_dataset_small, aes(x=gov_RILE, y=climate_finance_adj_GDP_cap))+
+  theme_classic()+
+  xlab("Government Ideology (gov_RILE score)")+
+  ylab("Total Climate Finance (USD Thousands/GDP per Capita)")+
+  theme(axis.title = element_text(size=8))+
+  geom_smooth(method = lm, level = 0.99, color = "black", size = 0.5, linetype = "solid")+
+  ylim(0,50)+
+ggtitle("Trends in Climate Finance Allocation and Government Ideology")+
+  theme(plot.title = element_text(size=10))+
+theme(plot.title = element_text(hjust = 0.5))
+```
+```{r}
+##Changing names to bilateral and multilateral
+bi_mult <- my_dataset
+
+bi_mult$clim_spend <- bi_mult$Climate.related.development.finance...Commitment...Current.USD.thousand/1000
+
+bi_mult$recip_unspec[bi_mult$recip_unspec == 0] <- "Bilateral"
+
+bi_mult$recip_unspec[bi_mult$recip_unspec == 1] <- "Multilateral"
+```
+```{r}
+##Bilateral vs multilateral
+ggplot(bi_mult, aes(fill =factor(recip_unspec), x = Year, y = clim_spend)) + 
+  guides(fill=guide_legend(title = "Finance Type"))+
+  theme_classic()+
+  geom_bar(position = position_stack(reverse = TRUE), stat = "identity") + 
+  labs(x = "Year", y = "Climate finance spending (USD Millions)", title = "Bilateral versus Multilateral Finance") + 
+  theme(axis.title = element_text(size=8))+
+  theme(plot.title=element_text(hjust = 0.5))+
+  scale_fill_hue(l=40, c=35)
+```
+
+```{r fig.width=10}
+##gov_per501 variance
+ggplot(my_dataset_small, aes(x = factor(Year), y = gov_per501)) +
+  geom_boxplot() +
+  labs(x = "Year", y = "Environmental Ideology Score (gov_per501)", title = "Variance in gov_per501 variable")+
+  theme(plot.title = element_text(hjust = 0.5))
+```
+
+```{r fig.width=10}
+##gov_RILE variance
+ggplot(my_dataset_small, aes(x = factor(Year), y = gov_RILE)) +
+  geom_boxplot()+
+  labs(x = "Year", y = "Government right-left score (gov_RILE)", title = "Variance in gov_RILE variable")+
+  theme(plot.title = element_text(hjust = 0.5))
+```
+
+```{r fig.height=12, fig.width=18}
+##whole bubble gov_RILE
+ggplot(my_dataset_small, aes(x = Year, y = gov_RILE, size = climate_finance_adj_GDP_cap)) + 
+  geom_line(size=0.5, color = "darkgrey")+
+  geom_point(data=my_dataset_small,aes(x = Year,y = gov_RILE, size = climate_finance_adj_GDP_cap,color=Provider))+
+  theme(legend.title=element_text(size=8), legend.text = element_text(size=8))+
+  guides(color = FALSE)+
+   scale_size(range = c(.1, 10), name="Climate Finance Spending/GDP per capita (USD Thousands)")+
+ facet_wrap(~factor(Provider)) 
+```
+
+```{r fig.height=12, fig.width=18}
+##whole bubble gov_per501
+ggplot(my_dataset_small, aes(x = Year, y = gov_per501, size = climate_finance_adj_GDP_cap)) + 
+  geom_line(size=0.5, color = "darkgrey")+
+  geom_point(data=my_dataset_small,aes(x = Year,y = gov_per501, size = climate_finance_adj_GDP_cap,color=Provider))+
+  theme(legend.title=element_text(size=8), legend.text = element_text(size=8))+
+  guides(color = FALSE)+
+   scale_size(range = c(.1, 10), name="Climate Finance Spending/GDP per capita (USD Thousands)")+
+ facet_wrap(~factor(Provider)) 
+```
+```{r fig.height=12, fig.width=18}
+##minister RILE whole bubble
+ggplot(my_dataset_small, aes(x = Year, y = minister_RILE, size = climate_finance_adj_GDP_cap)) + 
+  geom_line(size=0.5, color = "darkgrey")+
+  geom_point(data=my_dataset_small,aes(x = Year,y = minister_RILE, size = climate_finance_adj_GDP_cap,color=Provider))+
+  theme(legend.title=element_text(size=8), legend.text = element_text(size=8))+
+  guides(color = FALSE)+
+   scale_size(range = c(.1, 10), name="Climate Finance Spending/GDP per capita (USD Thousands)")+
+ facet_wrap(~factor(Provider)) 
+```
+
+```{r fig.height=12, fig.width=18}
+##minister per501 whole bubble
+ggplot(my_dataset_small, aes(x = Year, y = minister_per501, size = climate_finance_adj_GDP_cap)) + 
+  geom_line(size=0.5, color = "darkgrey")+
+  geom_point(data=my_dataset_small,aes(x = Year,y = minister_per501, size = climate_finance_adj_GDP_cap,color=Provider))+
+  theme(legend.title=element_text(size=8), legend.text = element_text(size=8))+
+  guides(color = FALSE)+
+   scale_size(range = c(.1, 10), name="Climate Finance Spending/GDP per capita (USD Thousands)")+
+ facet_wrap(~factor(Provider)) 
+```
+
+```{r fig.height=18, fig.width=12}
+##gov_RILE top6 plot
+ggplot(top_6, aes(x = factor(cabinet_name, levels = unique(cabinet_name)), y = gov_RILE, fill = Provider))+
+  geom_bar(stat = "identity")+
+  labs(x = "Government Cabinet", y = "Government left-right ideology (gov_RILE)", title = "Government left-right ideology of biggest six donors")+
+  facet_wrap(~factor(Provider), scales = "free_x", nrow = 3)+
+ theme(legend.position = "none")
+```

@@ -1,0 +1,1557 @@
+---
+title: "Diss_database"
+author: "XWXJ2"
+date: "25/01/2023"
+output: word_document
+---
+```{r}
+rm(list = ls())
+```
+
+###Database for governments
+
+##Parlgov data
+
+Parlgov has data on most governing cabinets of OECD member countries covering 1000 elections. Each party that forms part of a governing cabinet is clearly marked, as well as other characteristics such as their number of seats in the legislature and left-right score.
+
+I will use this data to form the basis of my dataset for governing cabinets and their political ideology over the period 2012-2020.
+
+##Loading in parlgov dataset
+```{r}
+cabinet <- read.csv("parlgov_cabinet.csv")
+```
+
+##Data cleaning
+
+We only want parties that have formed part of the governing cabinet, so we can remove those who do not govern. 
+
+We also can remove all observations that fall outside of our time period of 2012-2020. As parlgov notes the start data of a cabinet but not the end date, some manual checks will have to be made to ensure no cabinets are removed or left in the datset.
+
+```{r}
+cabinet <- cabinet[cabinet$cabinet_party == 1,]#removing parties not part of cabinets
+```
+
+```{r}
+cabinet <- cabinet[cabinet$start_date>2005-01-01,]#removing governments starting before 2005 as this earliest relevant cabinet
+```
+
+```{r}
+cabinet <- cabinet[cabinet$start_date<2021,]#removing governments starting after 2020
+```
+
+```{r}
+##Manual removing of cabinet IDs
+ID_rm <- c(234, 385, 736, 257, 888, 583, 449, 886, 441, 264, 80, 431, 675, 103, 308, 610, 612, 504, 580, 15, 600, 260, 316, 788, 71, 138, 274, 686, 902, 877, 759, 277, 383, 802, 46, 807, 306, 85, 876, 581, 224, 188, 325, 706, 162, 130, 555, 246, 558, 538, 179, 864, 1125, 1126, 1128, 1129, 1131, 1132, 1133, 1135, 1031, 567, 117, 823, 770, 850, 679, 390, 134, 494, 374, 493, 12, 124, 65, 69, 652, 427, 251, 693, 18, 322, 312, 754, 356, 164, 755, 169, 858, 185, 269, 319, 292, 407, 803, 806, 497, 475, 1075, 516, 119, 157, 173, 1077, 198, 855, 508)#cabinet_IDs to be removed
+
+for (i in ID_rm){
+  cabinet <- cabinet[cabinet$cabinet_id != i,]}
+```
+
+##Sample
+
+For our sample, we want the greatest number of OECD democracies to have the most observations possible.
+
+```{r}
+c(unique(cabinet$country_name))
+```
+There are 36 different countries in the parlgov dataset, covering a mix of EU member state and OECD members. OECD members not included are Chile, Colombia, Costa Rica, South Korea, Mexico and the United States.
+
+Most countries in the dataset are OECD members, apart from Bulgaria, Cyprus, Croatia, Romania and Malta.
+
+As our time period for our outcome data runs from 2012-2020, we need countries who were OECD members during this time. Colombia, Costa Rica, Latvia and Lithuania all joined during this period and therefore have incomplete data for the whole time period. They will therefore be excluded from the sample.
+
+This leaves us with a total sample of 33 countries. Cabinet data for South Korea, Mexico and the United States will have to be added manually as they do not appear in the parlgov dataset.
+
+Chile appears in neither the parlgov nor manifesto datasets and therefore will also be excluded.
+
+```{r}
+##Removing Bulgaria, Cyprus, Croatia, Romania, Malta, Lithuania and Latvia
+country_rm <- c("Bulgaria", "Cyprus", "Croatia", "Romania", "Malta", "Lithuania", "Latvia")
+
+for (i in country_rm){
+  cabinet <- cabinet[cabinet$country_name != i,]
+}
+```
+
+```{r}
+c(unique(cabinet$country_name))#check rm
+```
+
+##Manifesto data
+
+Parlgov incorporates the party_id codes manifesto uses. Therefore, it should be possible to merge manifesto data to our dataset using the CMP manifesto ID and the election date.
+
+First, we need to retrieve the CMP number from the parlgov main datset
+
+```{r}
+##Loading parlgov main dataset
+party <- read.csv("parlgov_party.csv")
+```
+
+```{r}
+party_2 <- data.frame(party$party_id, party$cmp)#creating dataframe with only relevant numbers
+```
+
+```{r}
+cabinet_2 <- merge(cabinet, party_2, by.x = "party_id", by.y = "party.party_id" )#merging cmp data
+```
+
+```{r}
+missing_party <- c(unique(cabinet_2$party_name[is.na(cabinet_2$party.cmp) == TRUE]))#merging checks
+```
+Our merging reveals 55 parties have no cmp number in the parlgov database. Manual checks with the manifesto database reveals this not to be the case, so cmp numbers for these parties will have to be added manually.
+
+##Manifesto
+
+```{r}
+##Loading in dataset
+manifesto <- read.csv("manifesto.csv")
+```
+
+Firstly, we need to crosscheck missing parties against the manifesto database and add in cmp numbers.
+
+```{r}
+##Replace missing values
+for (i in missing_party){
+  pos <- match(i, manifesto$partyname)
+  if(is.na(pos) == FALSE){
+    cabinet_2$party.cmp[cabinet_2$party_name == i] <- manifesto$party[pos]
+  }
+}
+
+```
+
+```{r}
+missing_party <- c(unique(cabinet_2$party_name[is.na(cabinet_2$party.cmp) == TRUE]))#merging checks
+print(missing_party)
+```
+
+We successfully found 4 cmp values. However, this still leaves 51. This could be due to sign errors which need manual checks.
+
+##Manifesto continued
+
+It appears that while parlgov uses party names in the native language, manifesto uses anglicised party names. I shall use the anglicised names in the parlgov data to correct this.
+
+```{r}
+##Translated party names
+for (i in missing_party){
+  pos <- match(cabinet_2$party_name_english[cabinet_2$party_name == i], manifesto$partyname)
+  if(is.na(pos) == FALSE){
+    cabinet_2$party.cmp[cabinet_2$party_name == i] <- manifesto$party[pos]
+  }
+}
+```
+
+```{r}
+missing_party <- c(unique(cabinet_2$party_name[is.na(cabinet_2$party.cmp) == TRUE]))#merging checks
+print(missing_party)
+```
+
+This now leaves us with 29 parties. This is due to grammatical differences in names, which I will manual correct in the following list:
+
+```{r}
+##List of those party names in manifesto database
+man_party_names <- c("Tradition, Responsibility, Prosperity 09", "Union of the Center", "Liberal Alliance", "Free and Equal", "Radical Party", "Bridge", "Ordinary People and Independent Personalities", "Zoran JankoviÄ‡'s List - Positive Slovenia")
+```
+
+```{r}
+man_part_2 <- c("Public Affairs", "ANO 2011", "Modern Centre Party", "Party of Alenka BratuÅ¡ek", "We can", "All of us", "In Tide", "We Are Family", "Reform Party", "Republic Onwards!", "True Finns", "List of Marjan Å arec")
+```
+
+```{r}
+##Manual writing party numbers to names
+cabinet_2$party.cmp[cabinet_2$party_name == "Tradice Odpov?dnost Prosperita 09"] <- 82530
+
+cabinet_2$party.cmp[cabinet_2$party_name == "Unione / Centro"] <- 32530
+
+cabinet_2$party.cmp[cabinet_2$party_name == "Ny-Liberal Alliance"] <- 201506
+
+cabinet_2$party.cmp[cabinet_2$party_name == "Sinistra"] <- 32031
+
+cabinet_2$party.cmp[cabinet_2$party_name == "Parti radical de gauche"] <- 31421
+
+cabinet_2$party.cmp[cabinet_2$party_name == "Oby?ajní ?udia a nezávislé osobnosti"] <- 96620
+
+cabinet_2$party.cmp[cabinet_2$party_name == "Lista Zorana Jankovi?a – Pozitivna Slovenija"] <- 97340
+
+cabinet_2$party.cmp[cabinet_2$party_name == "Državljanska lista"] <- 97450
+
+cabinet_2$party.cmp[cabinet_2$party_name == "LIDEM – liberální demokraté"] <- 82952
+
+cabinet_2$party.cmp[cabinet_2$party_name == "Akce nespokojených ob?an? 2011"] <- 82430
+
+cabinet_2$party.cmp[cabinet_2$party_name == "Stranka modernega"] <- 97461
+
+cabinet_2$party.cmp[cabinet_2$party_name == "Zavezništvo Alenke Bratušek"] <- 97460
+
+cabinet_2$party.cmp[cabinet_2$party_name == "Podemos"] <- 81240
+
+cabinet_2$party.cmp[cabinet_2$party_name == "Kulanu"] <- 72450
+
+cabinet_2$party.cmp[cabinet_2$party_name == "En Marea | Grupo Común da Esquerda"] <- 33097
+
+cabinet_2$party.cmp[cabinet_2$party_name == "Sme Rodina – Boris Kollár"] <- 96725
+
+cabinet_2$party.cmp[cabinet_2$party_name == "Viðreisn"] <- 15450
+
+cabinet_2$party.cmp[cabinet_2$party_name == "La République En Marche! | Renaissance"] <- 31425#only for year 2017 so see if error later on
+
+cabinet_2$party.cmp[cabinet_2$party_name == "Uusi vaihtoehto | Sininen tulevaisuus"] <- 14820
+
+cabinet_2$party.cmp[cabinet_2$party_name == "Lista Marjana Šarca"] <- 97341
+```
+
+```{r}
+missing_party <- c(unique(cabinet_2$party_name[is.na(cabinet_2$party.cmp) == TRUE]))#merging checks
+print(missing_party)
+```
+
+```{r}
+missing_party <- print(c(unique(cabinet_2$party_name[is.na(cabinet_2$party.cmp) == TRUE & cabinet_2$seats > 0])))
+```
+```{r}
+##Seat count
+for (i in missing_party){
+  print(cabinet_2$seats[cabinet_2$party_name == i])
+}
+```
+
+Now there are only 4 parties with no cmp number (one is non affiliates) who won seats in the legislature. Most of these parties have very low seat numbers apart from Nuevo Centrodestra, which has 29 seats. As it was a split-off from the People of Freedom party in 2013 and has a very similar left-right score captured by parlgov (7.4 compared to 7.14), I will use the Manifesto Project characteristics of People of Freedom to approximate Nuevo Centrodestra.
+
+```{r}
+##Manual writing
+cabinet_2$party.cmp[cabinet_2$party_name == "Nuovo Centrodestra | Alternativa Popolare"] <- 32061
+```
+
+
+##Saving dataset (in case anything goes wrong)
+```{r}
+write.csv(cabinet_2, "C:/Users/maxsk/Documents/UCL/Year 3/Dissertation/Data/cabinet_2.csv")
+```
+
+##Adding missing cabinets
+
+As previously explained, I will have to manually add cabinet data for South Korea, the United States and Mexico. I will, where possible, follow parlgov's layout to fit with the rest of the data, taking data from the Manifesto project.
+
+For South Korea, Mexico and the United States, the president is both the head of state and head of government. Therefore, variables measuring political ideology will only be used for the political party that the president is from, rather than a calculation from seats in the legislature.
+
+```{r}
+##Importing additional cabinets
+add_cab <- read.csv("Added_cabinets.csv")
+```
+
+```{r}
+##Combining dataframes
+cabinet_2 <- rbind(cabinet_2, add_cab)
+```
+Observations having now been added for South Korea, Mexico and the USA. Now we can start importing manifesto variables for right-left and environmental scores.
+
+##Manifesto rile and per501
+
+Manifesto has two measurements I am interested in using for my independent variables for right-left orientation and 'greeness'.
+
+rile - Right-left position of party as given in Michael Laver/Ian Budge
+
+RILE is constructed out of 57 policy categories, which are broadly fall into groupings as either left, right or centre. The RILE figure is the sum of all the percentages in the right grouping minus the sum of all percentages in the left grouping for a party. Therefore, positive values will indicate greater right-wing attitudes and negative values will indicate greater left-wing attitudes on a scale of -100 to 100. 
+
+The policy categories and groupings are made a priori based on political theory and therefore do not change over time. This means the scale lends itself well to cross-country comparisons across time, as substantively the percentage values do not change (Volkens et al., 2013).
+
+However, due to its a priori construction the external validity of RILE has come under some criticism by scholars. Because RILE was constructed using political theory form the early 1900s, it is pertinent to question whether it can still adequately predict party positions in the 20th century. Empirical analyses and expert surveys has largely confirmed that Manifesto RILE estimates capture party positions well, with general reliability between 80-90 percent (Volkens et al., 2013). RILE is therefore still the best indicator we have for right-left orientation across multiple different countries and time periods.
+
+per501 - measure of environmental protection, climate change action and other green policies of political parties (Manifesto Codebook). It captures policies such as preservation of natural resources and protection of the environment (Manifesto Codebook).
+
+per501 is calculated as the percentage of quasi-sentences in the party's manifesto that related to environmental, climate and green policies. per501 is not used when calculating RILE and therefore can be used as a seperate independent variable.
+
+##Adding RILE and per501 values to the dataset
+
+```{r}
+##Creating empty columns
+cabinet_2$RILE <- 0
+
+cabinet_2$per501 <- 0
+```
+
+```{r}
+##Changing newly added dates
+cabinet_2$election_date[468] <- "2006-07-02"
+cabinet_2$start_date[468] <- "2006-12-01"
+
+cabinet_2$election_date[469] <- "2012-07-01"
+cabinet_2$start_date[469] <- "2012-12-01"
+
+cabinet_2$election_date[470] <- "2018-07-01"
+cabinet_2$start_date[470] <- "2018-12-01"
+
+cabinet_2$election_date[471] <- "2007-12-09"
+cabinet_2$start_date[471] <- "2008-02-24"
+
+cabinet_2$election_date[472] <- "2012-12-19"
+cabinet_2$start_date[472] <- "2013-02-25"
+
+cabinet_2$start_date[473] <- "2017-03-10"
+
+cabinet_2$election_date[474] <- "2017-05-09"
+cabinet_2$start_date[474] <- "2017-05-10"
+
+cabinet_2$election_date[475] <- "2008-11-04"
+cabinet_2$start_date[475] <- "2013-01-20"
+
+cabinet_2$election_date[476] <- "2012-11-06"
+cabinet_2$start_date[476] <- "2013-01-20"
+
+cabinet_2$election_date[477] <- "2016-11-08"
+cabinet_2$start_date[477] <- "2017-01-20"
+
+```
+```{r}
+library(lubridate)
+library(dplyr)
+```
+
+```{r}
+##Reformating manifesto dates
+manifesto$edate <- strptime(as.character(manifesto$edate), "%d/%m/%Y")
+```
+```{r}
+manifesto$edate <- as.character(manifesto$edate)
+```
+
+```{r}
+##Checking date matching
+manifesto$edate[2978] == cabinet_2$election_date[3]
+print(manifesto$edate[2978])
+print(cabinet_2$election_date[3])
+```
+
+```{r}
+##Adding RILE values
+for (i in 1:nrow(cabinet_2)){
+  x <- as.character(cabinet_2$election_date[i])
+  y <- as.character(cabinet_2$party.cmp[i])
+  z <- manifesto$rile[manifesto$edate == x & manifesto$party == y]
+  if(length(z) != 0){
+    cabinet_2$RILE[i] <- z
+  }
+}
+```
+
+```{r}
+##Adding per501 values
+for (i in 1:nrow(cabinet_2)){
+  x <- cabinet_2$election_date[i]
+  y <- cabinet_2$party.cmp[i]
+  z <- manifesto$per501[manifesto$edate == x & manifesto$party == y]
+  if(length(z) != 0){
+    cabinet_2$per501[i] <- z
+  }
+}
+```
+
+```{r}
+length(unique(cabinet_2$party_name[cabinet_2$RILE == 0]))
+```
+```{r}
+print(unique(cabinet_2$party_name[cabinet_2$RILE == 0]))
+```
+
+```{r}
+print(unique(cabinet_2$election_date[cabinet_2$RILE == 0]))
+```
+##Saving dataset (in case anything goes wrong)
+```{r}
+write.csv(cabinet_2, "C:/Users/maxsk/Documents/UCL/Year 3/Dissertation/Data/cabinet_2_1.csv")
+```
+
+```{r}
+##Renaming for data cleaning
+cabinet_3 <- cabinet_2
+```
+
+
+```{r}
+cabinet_3$Check <- 0#creating column for checks
+```
+
+```{r}
+cabinet_3$Check[cabinet_3$RILE == 0] <- "NO"
+```
+
+```{r}
+##Correcting missing values
+cabinet_3$RILE[cabinet_3$party.cmp == 96423 & cabinet_3$election_date == "2016-03-06"] <- -8.333
+
+cabinet_3$per501[cabinet_3$party.cmp == 96423 & cabinet_3$election_date == "2016-03-06"] <- 0
+
+cabinet_3$Check[cabinet_3$party.cmp == 96423 & cabinet_3$election_date == "2016-03-06"] <- "YES"
+
+cabinet_3$RILE[cabinet_3$party.cmp == 32530 & cabinet_3$election_date == "2013-02-25"] <- 33.652
+
+cabinet_3$per501[cabinet_3$party.cmp == 32530 & cabinet_3$election_date == "2013-02-25"] <- 1.671
+
+cabinet_3$Check[cabinet_3$party.cmp == 32530 & cabinet_3$election_date == "2013-02-25"] <- "YES"
+
+cabinet_3$party.cmp[cabinet_3$party_name == "Centro Democrático e Social – Partido Popular" & cabinet_3$election_date == "2011-06-05"] <- 35520#party cmp was wrong
+
+cabinet_3$RILE[cabinet_3$party.cmp == 35520 & cabinet_3$election_date == "2011-06-05"] <- 22.817
+
+cabinet_3$per501[cabinet_3$party.cmp == 35520 & cabinet_3$election_date == "2011-06-05"] <- 0.751
+
+cabinet_3$Check[cabinet_3$party.cmp == 35520 & cabinet_3$election_date == "2011-06-05"] <- "YES"
+
+cabinet_3$RILE[cabinet_3$party.cmp == 23420 & cabinet_3$election_date == "2013-02-25"] <- -7.172
+
+cabinet_3$per501[cabinet_3$party.cmp == 23420 & cabinet_3$election_date == "2013-02-25"] <- 3.769
+
+cabinet_3$Check[cabinet_3$party.cmp == 23420 & cabinet_3$election_date == "2013-02-25"] <- "YES"
+
+cabinet_3$RILE[cabinet_3$party.cmp == 31624 & cabinet_3$election_date == "2012-06-17"] <- -19.613
+
+cabinet_3$per501[cabinet_3$party.cmp == 31624 & cabinet_3$election_date == "2012-06-17"] <- 6.295
+
+cabinet_3$Check[cabinet_3$party.cmp == 31624 & cabinet_3$election_date == "2012-06-17"] <- "YES"
+
+cabinet_3$RILE[cabinet_3$party.cmp == 31624 & cabinet_3$election_date == "2017-06-18"] <- -17.92
+
+cabinet_3$per501[cabinet_3$party.cmp == 31624 & cabinet_3$election_date == "2017-06-18"] <- 3.319
+
+cabinet_3$Check[cabinet_3$party.cmp == 31624 & cabinet_3$election_date == "2017-06-18"] <- "YES"
+
+cabinet_3$RILE[cabinet_3$party.cmp == 31626 & cabinet_3$election_date == "2007-06-17"] <- -11.987
+
+cabinet_3$per501[cabinet_3$party.cmp == 31626 & cabinet_3$election_date == "2007-06-17"] <- 6.099
+
+cabinet_3$Check[cabinet_3$party.cmp == 31626 & cabinet_3$election_date == "2007-06-17"] <- "YES"
+
+cabinet_3$RILE[cabinet_3$party.cmp == 31626 & cabinet_3$election_date == "2017-06-18"] <- 13.619
+
+cabinet_3$per501[cabinet_3$party.cmp == 31626 & cabinet_3$election_date == "2017-06-18"] <- 4.28
+
+cabinet_3$Check[cabinet_3$party.cmp == 31626 & cabinet_3$election_date == "2017-06-18"] <- "YES"
+
+cabinet_3$RILE[cabinet_3$party.cmp == 31626 & cabinet_3$election_date == "2012-06-17"] <- -2.331
+
+cabinet_3$per501[cabinet_3$party.cmp == 31626 & cabinet_3$election_date == "2012-06-17"] <- 0.847
+
+cabinet_3$Check[cabinet_3$party.cmp == 31626 & cabinet_3$election_date == "2012-06-17"] <- "YES"
+
+cabinet_3$party.cmp[cabinet_3$party_name == "Liberals" & cabinet_3$election_date == "2010-05-06"] <- 51421#party cmp was wrong
+
+cabinet_3$RILE[cabinet_3$party.cmp == 51421 & cabinet_3$election_date == "2010-05-06"] <- 4.66
+
+cabinet_3$per501[cabinet_3$party.cmp == 51421 & cabinet_3$election_date == "2010-05-06"] <- 7.36
+
+cabinet_3$Check[cabinet_3$party.cmp == 51421 & cabinet_3$election_date == "2010-05-06"] <- "YES"
+
+cabinet_3$RILE[cabinet_3$party.cmp == 82320 & cabinet_3$election_date == "2013-10-25"] <- -26.279
+
+cabinet_3$per501[cabinet_3$party.cmp == 82320 & cabinet_3$election_date == "2013-10-25"] <- 16.047
+
+cabinet_3$Check[cabinet_3$party.cmp == 82320 & cabinet_3$election_date == "2013-10-25"] <- "YES"
+
+cabinet_3$RILE[cabinet_3$party.cmp == 31110 & cabinet_3$election_date == "2012-06-17"] <- -36.106
+
+cabinet_3$per501[cabinet_3$party.cmp == 31110 & cabinet_3$election_date == "2012-06-17"] <- 14.071
+
+cabinet_3$Check[cabinet_3$party.cmp == 31110 & cabinet_3$election_date == "2012-06-17"] <- "YES"
+
+cabinet_3$RILE[cabinet_3$party.cmp == 31110 & cabinet_3$election_date == "2007-06-17"] <- -30.168
+
+cabinet_3$per501[cabinet_3$party.cmp == 31110 & cabinet_3$election_date == "2007-06-17"] <- 13.783
+
+cabinet_3$Check[cabinet_3$party.cmp == 31110 & cabinet_3$election_date == "2007-06-17"] <- "YES"
+
+cabinet_3$RILE[cabinet_3$party.cmp == 86421 & cabinet_3$election_date == "2010-04-25"] <- -4.462
+
+cabinet_3$per501[cabinet_3$party.cmp == 86421 & cabinet_3$election_date == "2010-04-25"] <- 0.097
+
+cabinet_3$Check[cabinet_3$party.cmp == 86421 & cabinet_3$election_date == "2010-04-25"] <- "YES"
+
+cabinet_3$RILE[cabinet_3$party.cmp == 96710 & cabinet_3$election_date == "2016-03-06"] <- 12.948
+
+cabinet_3$per501[cabinet_3$party.cmp == 96710 & cabinet_3$election_date == "2016-03-06"] <- 5.51
+
+cabinet_3$Check[cabinet_3$party.cmp == 96710 & cabinet_3$election_date == "2016-03-06"] <- "YES"
+
+cabinet_3$RILE[cabinet_3$party.cmp == 82523 & cabinet_3$election_date == "2013-10-25"] <- -23.054
+
+cabinet_3$per501[cabinet_3$party.cmp == 82523 & cabinet_3$election_date == "2013-10-25"] <- 6.287
+
+cabinet_3$Check[cabinet_3$party.cmp == 82523 & cabinet_3$election_date == "2013-10-25"] <- "YES"
+
+cabinet_3$RILE[cabinet_3$party.cmp == 31421 & cabinet_3$election_date == "2012-06-17"] <- -22.378
+
+cabinet_3$per501[cabinet_3$party.cmp == 31421 & cabinet_3$election_date == "2012-06-17"] <- 3.846
+
+cabinet_3$Check[cabinet_3$party.cmp == 31421 & cabinet_3$election_date == "2012-06-17"] <- "YES"
+
+cabinet_3$RILE[cabinet_3$party.cmp == 31320 & cabinet_3$election_date == "2012-06-17"] <- -32.71
+
+cabinet_3$per501[cabinet_3$party.cmp == 31320 & cabinet_3$election_date == "2012-06-17"] <- 3.271
+
+cabinet_3$Check[cabinet_3$party.cmp == 31320 & cabinet_3$election_date == "2012-06-17"] <- "YES"
+
+cabinet_3$RILE[cabinet_3$party.cmp == 31320 & cabinet_3$election_date == "2007-06-17"] <- -21.262
+
+cabinet_3$per501[cabinet_3$party.cmp == 31320 & cabinet_3$election_date == "2007-06-17"] <- 1.329
+
+cabinet_3$Check[cabinet_3$party.cmp == 31320 & cabinet_3$election_date == "2007-06-17"] <- "YES"
+
+cabinet_3$RILE[cabinet_3$party.cmp == 96955 & cabinet_3$election_date == "2016-03-06"] <- 0.439
+
+cabinet_3$per501[cabinet_3$party.cmp == 96955 & cabinet_3$election_date == "2016-03-06"] <- 0.878
+
+cabinet_3$Check[cabinet_3$party.cmp == 96955 & cabinet_3$election_date == "2016-03-06"] <- "YES"
+
+cabinet_3$RILE[cabinet_3$party.cmp == 32460 & cabinet_3$election_date == "2013-02-25"] <- 1.19
+
+cabinet_3$per501[cabinet_3$party.cmp == 32460 & cabinet_3$election_date == "2013-02-25"] <- 4.167
+
+cabinet_3$Check[cabinet_3$party.cmp == 32460 & cabinet_3$election_date == "2013-02-25"] <- "YES"
+
+cabinet_3$RILE[cabinet_3$party.cmp == 82430 & cabinet_3$election_date == "2013-10-25"] <- -9.945
+
+cabinet_3$per501[cabinet_3$party.cmp == 82430 & cabinet_3$election_date == "2013-10-25"] <- 3.867
+
+cabinet_3$Check[cabinet_3$party.cmp == 82430 & cabinet_3$election_date == "2013-10-25"] <- "YES"
+
+cabinet_3$RILE[cabinet_3$party.cmp == 72450 & cabinet_3$election_date == "2019-09-17"] <- -22.451
+
+cabinet_3$per501[cabinet_3$party.cmp == 72450 & cabinet_3$election_date == "2019-09-17"] <- 4.864
+
+cabinet_3$Check[cabinet_3$party.cmp == 72450 & cabinet_3$election_date == "2019-09-17"] <- "YES"
+
+cabinet_3$RILE[cabinet_3$party.cmp == 96630 & cabinet_3$election_date == "2016-03-06"] <- 0.863
+
+cabinet_3$per501[cabinet_3$party.cmp == 96630 & cabinet_3$election_date == "2016-03-06"] <- 4.604
+
+cabinet_3$Check[cabinet_3$party.cmp == 96630 & cabinet_3$election_date == "2016-03-06"] <- "YES"
+
+cabinet_3$RILE[cabinet_3$party.cmp == 31425 & cabinet_3$election_date == "2017-06-18"] <- 0
+
+cabinet_3$per501[cabinet_3$party.cmp == 31425 & cabinet_3$election_date == "2017-06-18"] <- 3.039
+
+cabinet_3$Check[cabinet_3$party.cmp == 31425 & cabinet_3$election_date == "2017-06-18"] <- "YES"
+
+cabinet_3$party.cmp[cabinet_3$party_name == "Gesher" & cabinet_3$election_date == "2020-03-02"] <- 72031#party cmp was wrong
+
+cabinet_3$RILE[cabinet_3$party.cmp == 72031 & cabinet_3$election_date == "2020-03-02"] <- -35
+
+cabinet_3$per501[cabinet_3$party.cmp == 72031 & cabinet_3$election_date == "2020-03-02"] <- 5.625
+
+cabinet_3$Check[cabinet_3$party.cmp == 72031 & cabinet_3$election_date == "2020-03-02"] <- "YES"
+
+cabinet_3$RILE[cabinet_3$party.cmp == 113630 & cabinet_3$election_date == "2007-12-19"] <- -2.74
+
+cabinet_3$per501[cabinet_3$party.cmp == 113630 & cabinet_3$election_date == "2007-12-19"] <- 4
+
+cabinet_3$Check[cabinet_3$party.cmp == 113630 & cabinet_3$election_date == "2007-12-19"] <- "YES"
+
+cabinet_3$RILE[cabinet_3$party.cmp == 113630 & cabinet_3$election_date == "2012-12-19"] <- -32.031
+
+cabinet_3$per501[cabinet_3$party.cmp == 113630 & cabinet_3$election_date == "2012-12-19"] <- 2.734
+
+cabinet_3$Check[cabinet_3$party.cmp == 113630 & cabinet_3$election_date == "2012-12-19"] <- "YES"
+
+cabinet_3$RILE[cabinet_3$party.cmp == 113441 & cabinet_3$election_date == "2017-05-09"] <- -42.508
+
+cabinet_3$per501[cabinet_3$party.cmp == 113441 & cabinet_3$election_date == "2017-05-09"] <- 0
+
+cabinet_3$Check[cabinet_3$party.cmp == 113441 & cabinet_3$election_date == "2017-05-09"] <- "YES"
+
+```
+
+```{r}
+##Further checks
+cabinet_3$party.cmp[cabinet_3$party_name == "Synaspismós Rizospastikís Aristerás" & cabinet_3$election_date == "2015-09-20"] <- 34212#party cmp was wrong
+
+cabinet_3$RILE[cabinet_3$party.cmp == 34212 & cabinet_3$election_date == "2015-09-20"] <- -22.234
+
+cabinet_3$per501[cabinet_3$party.cmp == 34212 & cabinet_3$election_date == "2015-09-20"] <- 2.081
+
+cabinet_3$Check[cabinet_3$party.cmp == 34212 & cabinet_3$election_date == "2015-09-20"] <- "YES"
+
+cabinet_3$party.cmp[cabinet_3$party_name == "Synaspismós Rizospastikís Aristerás" & cabinet_3$election_date == "2015-01-25"] <- 34212#party cmp was wrong
+
+cabinet_3$RILE[cabinet_3$party.cmp == 34212 & cabinet_3$election_date == "2015-01-25"] <- -41.722
+
+cabinet_3$per501[cabinet_3$party.cmp == 34212 & cabinet_3$election_date == "2015-01-25"] <- 2.649
+
+cabinet_3$Check[cabinet_3$party.cmp == 34212 & cabinet_3$election_date == "2015-01-25"] <- "YES"
+
+cabinet_3$party.cmp[cabinet_3$party_name == "Demokraattinen Liitto – Demokratiska Förbundet | Vasemmistoliitto – Vänsterförbundet" & cabinet_3$election_date == "2011-04-17"] <- 14223#party cmp was wrong
+
+cabinet_3$RILE[cabinet_3$party.cmp == 14223 & cabinet_3$election_date == "2011-04-17"] <- -44.767
+
+cabinet_3$per501[cabinet_3$party.cmp == 14223 & cabinet_3$election_date == "2011-04-17"] <- 3.488
+
+cabinet_3$Check[cabinet_3$party.cmp == 14223 & cabinet_3$election_date == "2011-04-17"] <- "YES"
+
+cabinet_3$party.cmp[cabinet_3$party_name == "Demokraattinen Liitto – Demokratiska Förbundet | Vasemmistoliitto – Vänsterförbundet" & cabinet_3$election_date == "2019-04-14"] <- 14223#party cmp was wrong
+
+cabinet_3$RILE[cabinet_3$party.cmp == 14223 & cabinet_3$election_date == "2019-04-14"] <- -41.021
+
+cabinet_3$per501[cabinet_3$party.cmp == 14223 & cabinet_3$election_date == "2019-04-14"] <- 12.676
+
+cabinet_3$Check[cabinet_3$party.cmp == 14223 & cabinet_3$election_date == "2019-04-14"] <- "YES"
+
+cabinet_3$party.cmp[cabinet_3$party_name == "En Marea | Grupo Común da Esquerda" & cabinet_3$election_date == "2019-11-10"] <- 33908#party cmp was wrong
+
+cabinet_3$RILE[cabinet_3$party.cmp == 33908 & cabinet_3$election_date == "2019-11-10"] <- -32.55
+
+cabinet_3$per501[cabinet_3$party.cmp == 33908 & cabinet_3$election_date == "2019-11-10"] <- 5.606
+
+cabinet_3$Check[cabinet_3$party.cmp == 33908 & cabinet_3$election_date == "2019-11-10"] <- "YES"
+
+cabinet_3$party.cmp[cabinet_3$party_name == "En Comú Podem" & cabinet_3$election_date == "2019-11-10"] <- 33210#party cmp was wrong
+
+cabinet_3$RILE[cabinet_3$party.cmp == 33210 & cabinet_3$election_date == "2019-11-10"] <- -37.633
+
+cabinet_3$per501[cabinet_3$party.cmp == 33210 & cabinet_3$election_date == "2019-11-10"] <- 4.704
+
+cabinet_3$Check[cabinet_3$party.cmp == 33210 & cabinet_3$election_date == "2019-11-10"] <- "YES"
+
+cabinet_3$party.cmp[cabinet_3$party_name == "Partido Social Democrata" & cabinet_3$election_date == "2015-10-04"] <- 35060#party cmp was wrong
+
+cabinet_3$RILE[cabinet_3$party.cmp == 35060 & cabinet_3$election_date == "2015-10-04"] <- 0.605
+
+cabinet_3$per501[cabinet_3$party.cmp == 35060 & cabinet_3$election_date == "2015-10-04"] <- 6.458
+
+cabinet_3$Check[cabinet_3$party.cmp == 35060 & cabinet_3$election_date == "2015-10-04"] <- "YES"
+
+cabinet_3$party.cmp[cabinet_3$party_name == "Nouveau centre" & cabinet_3$election_date == "2007-06-17"] <- 31626#party cmp was wrong
+
+cabinet_3$RILE[cabinet_3$party.cmp == 31626 & cabinet_3$election_date == "2007-06-17"] <- -11.987
+
+cabinet_3$per501[cabinet_3$party.cmp == 31626 & cabinet_3$election_date == "2007-06-17"] <- 6.099
+
+cabinet_3$Check[cabinet_3$party.cmp == 31626 & cabinet_3$election_date == "2007-06-17"] <- "YES"
+
+cabinet_3$party.cmp[cabinet_3$party_name == "Mouvement Réformateur" & cabinet_3$election_date == "2014-05-25"] <- 21426#party cmp was wrong
+
+cabinet_3$RILE[cabinet_3$party.cmp == 21426 & cabinet_3$election_date == "2014-05-25"] <- -5.212
+
+cabinet_3$per501[cabinet_3$party.cmp == 21426 & cabinet_3$election_date == "2014-05-25"] <- 3.009
+
+cabinet_3$Check[cabinet_3$party.cmp == 21426 & cabinet_3$election_date == "2014-05-25"] <- "YES"
+
+cabinet_3$party.cmp[cabinet_3$party_name == "Mouvement Réformateur" & cabinet_3$election_date == "2010-06-13"] <- 21426#party cmp was wrong
+
+cabinet_3$RILE[cabinet_3$party.cmp == 21426 & cabinet_3$election_date == "2010-06-13"] <- -0.2
+
+cabinet_3$per501[cabinet_3$party.cmp == 21426 & cabinet_3$election_date == "2010-06-13"] <- 2.533
+
+cabinet_3$Check[cabinet_3$party.cmp == 21426 & cabinet_3$election_date == "2010-06-13"] <- "YES"
+
+cabinet_3$party.cmp[cabinet_3$party_name == "Adalet ve Kalk?nma Partisi" & cabinet_3$election_date == "2007-07-22"] <- 74628#party cmp was wrong
+
+cabinet_3$RILE[cabinet_3$party.cmp == 74628 & cabinet_3$election_date == "2007-07-22"] <- 4.2
+
+cabinet_3$per501[cabinet_3$party.cmp == 74628 & cabinet_3$election_date == "2007-07-22"] <- 0.767
+
+cabinet_3$Check[cabinet_3$party.cmp == 74628 & cabinet_3$election_date == "2007-07-22"] <- "YES"
+
+cabinet_3$party.cmp[cabinet_3$party_name == "Adalet ve Kalk?nma Partisi" & cabinet_3$election_date == "2011-06-12"] <- 74628#party cmp was wrong
+
+cabinet_3$RILE[cabinet_3$party.cmp == 74628 & cabinet_3$election_date == "2011-06-12"] <- -8.974
+
+cabinet_3$per501[cabinet_3$party.cmp == 74628 & cabinet_3$election_date == "2011-06-12"] <- 2.718
+
+cabinet_3$Check[cabinet_3$party.cmp == 74628 & cabinet_3$election_date == "2011-06-12"] <- "YES"
+
+cabinet_3$party.cmp[cabinet_3$party_name == "Adalet ve Kalk?nma Partisi" & cabinet_3$election_date == "2015-06-07"] <- 74628#party cmp was wrong
+
+cabinet_3$RILE[cabinet_3$party.cmp == 74628 & cabinet_3$election_date == "2015-06-07"] <- -7.793
+
+cabinet_3$per501[cabinet_3$party.cmp == 74628 & cabinet_3$election_date == "2015-06-07"] <- 2.549
+
+cabinet_3$Check[cabinet_3$party.cmp == 74628 & cabinet_3$election_date == "2015-06-07"] <- "YES"
+
+cabinet_3$party.cmp[cabinet_3$party_name == "Adalet ve Kalk?nma Partisi" & cabinet_3$election_date == "2015-11-01"] <- 74628#party cmp was wrong
+
+cabinet_3$RILE[cabinet_3$party.cmp == 74628 & cabinet_3$election_date == "2015-11-01"] <- -7.381
+
+cabinet_3$per501[cabinet_3$party.cmp == 74628 & cabinet_3$election_date == "2015-11-01"] <- 2.413
+
+cabinet_3$Check[cabinet_3$party.cmp == 74628 & cabinet_3$election_date == "2015-11-01"] <- "YES"
+
+cabinet_3$party.cmp[cabinet_3$party_name == "Adalet ve Kalk?nma Partisi" & cabinet_3$election_date == "2015-11-01"] <- 74628#party cmp was wrong
+
+cabinet_3$RILE[cabinet_3$party.cmp == 74628 & cabinet_3$election_date == "2018-06-24"] <- -6.78
+
+cabinet_3$per501[cabinet_3$party.cmp == 74628 & cabinet_3$election_date == "2018-06-24"] <- 3.189
+
+cabinet_3$Check[cabinet_3$party.cmp == 74628 & cabinet_3$election_date == "2018-06-24"] <- "YES"
+
+cabinet_3$party.cmp[cabinet_3$party_name == "Adalet ve Kalk?nma Partisi" & cabinet_3$election_date == "2008-09-21"] <- 97322#party cmp was wrong
+
+cabinet_3$RILE[cabinet_3$party.cmp == 97322 & cabinet_3$election_date == "2008-09-21"] <- -11.488
+
+cabinet_3$per501[cabinet_3$party.cmp == 97322 & cabinet_3$election_date == "2008-09-21"] <- 2.188
+
+cabinet_3$Check[cabinet_3$party.cmp == 97322 & cabinet_3$election_date == "2008-09-21"] <- "YES"
+
+cabinet_3$party.cmp[cabinet_3$party_name == "Adalet ve Kalk?nma Partisi" & cabinet_3$election_date == "2011-12-04"] <- 97322#party cmp was wrong
+
+cabinet_3$RILE[cabinet_3$party.cmp == 97322 & cabinet_3$election_date == "2011-12-04"] <- -1.058
+
+cabinet_3$per501[cabinet_3$party.cmp == 97322 & cabinet_3$election_date == "2011-12-04"] <- 5.385
+
+cabinet_3$Check[cabinet_3$party.cmp == 97322 & cabinet_3$election_date == "2011-12-04"] <- "YES"
+
+cabinet_3$party.cmp[cabinet_3$party_name == "Adalet ve Kalk?nma Partisi" & cabinet_3$election_date == "2014-07-13"] <- 97322#party cmp was wrong
+
+cabinet_3$RILE[cabinet_3$party.cmp == 97322 & cabinet_3$election_date == "2014-07-13"] <- -7.581
+
+cabinet_3$per501[cabinet_3$party.cmp == 97322 & cabinet_3$election_date == "2014-07-13"] <- 4.332
+
+cabinet_3$Check[cabinet_3$party.cmp == 97322 & cabinet_3$election_date == "2014-07-13"] <- "YES"
+
+cabinet_3$party.cmp[cabinet_3$party_name == "Adalet ve Kalk?nma Partisi" & cabinet_3$election_date == "2018-06-03"] <- 97322#party cmp was wrong
+
+cabinet_3$RILE[cabinet_3$party.cmp == 97322 & cabinet_3$election_date == "2018-06-03"] <- -10.124
+
+cabinet_3$per501[cabinet_3$party.cmp == 97322 & cabinet_3$election_date == "2018-06-03"] <- 3.099
+
+cabinet_3$Check[cabinet_3$party.cmp == 97322 & cabinet_3$election_date == "2018-06-03"] <- "YES"
+
+cabinet_3$party.cmp[cabinet_3$party_name == "Forza Italia – Il Popolo della Libertà" & cabinet_3$election_date == "2013-02-25"] <- 32061#party cmp was wrong
+
+cabinet_3$RILE[cabinet_3$party.cmp == 32061 & cabinet_3$election_date == "2013-02-25"] <- 3.81
+
+cabinet_3$per501[cabinet_3$party.cmp == 32061 & cabinet_3$election_date == "2013-02-25"] <- 6.19
+
+cabinet_3$Check[cabinet_3$party.cmp == 32061 & cabinet_3$election_date == "2013-02-25"] <- "YES"
+
+cabinet_3$party.cmp[cabinet_3$party_name == "Nieuw-Vlaamse Alliantie" & cabinet_3$election_date == "2014-05-25"] <- 21916#party cmp was wrong
+
+cabinet_3$RILE[cabinet_3$party.cmp == 21916 & cabinet_3$election_date == "2014-05-25"] <- 8.584
+
+cabinet_3$per501[cabinet_3$party.cmp == 21916 & cabinet_3$election_date == "2014-05-25"] <- 2.49
+
+cabinet_3$Check[cabinet_3$party.cmp == 21916 & cabinet_3$election_date == "2014-05-25"] <- "YES"
+
+cabinet_3$party.cmp[cabinet_3$party_name == "Kereszténydemokrata Néppárt" & cabinet_3$election_date == "2010-04-25"] <- 86421#party cmp was wrong
+
+cabinet_3$RILE[cabinet_3$party.cmp == 86421 & cabinet_3$election_date == "2010-04-25"] <- -4.462
+
+cabinet_3$per501[cabinet_3$party.cmp == 86421 & cabinet_3$election_date == "2010-04-25"] <- 0.582
+
+cabinet_3$Check[cabinet_3$party.cmp == 86421 & cabinet_3$election_date == "2010-04-25"] <- "YES"
+
+cabinet_3$party.cmp[cabinet_3$party_name == "Kereszténydemokrata Néppárt" & cabinet_3$election_date == "2014-04-06"] <- 86421#party cmp was wrong
+
+cabinet_3$RILE[cabinet_3$party.cmp == 86421 & cabinet_3$election_date == "2014-04-06"] <- 35.411
+
+cabinet_3$per501[cabinet_3$party.cmp == 86421 & cabinet_3$election_date == "2014-04-06"] <- 0
+
+cabinet_3$Check[cabinet_3$party.cmp == 86421 & cabinet_3$election_date == "2014-04-06"] <- "YES"
+
+cabinet_3$party.cmp[cabinet_3$party_name == "Kereszténydemokrata Néppárt" & cabinet_3$election_date == "2018-04-08"] <- 86421#party cmp was wrong
+
+cabinet_3$RILE[cabinet_3$party.cmp == 86421 & cabinet_3$election_date == "2018-04-08"] <- 48.655
+
+cabinet_3$per501[cabinet_3$party.cmp == 86421 & cabinet_3$election_date == "2018-04-08"] <- 0
+
+cabinet_3$Check[cabinet_3$party.cmp == 86421 & cabinet_3$election_date == "2018-04-08"] <- "YES"
+
+cabinet_3$party.cmp[cabinet_3$party_name == "Eestimaa Rahvalliit / Eesti Konservatiivne Rahvaerakond" & cabinet_3$election_date == "2019-03-03"] <- 83720#party cmp was wrong
+
+cabinet_3$RILE[cabinet_3$party.cmp == 83720 & cabinet_3$election_date == "2019-03-03"] <- 31.818
+
+cabinet_3$per501[cabinet_3$party.cmp == 83720 & cabinet_3$election_date == "2019-03-03"] <- 3.333
+
+cabinet_3$Check[cabinet_3$party.cmp == 83720 & cabinet_3$election_date == "2019-03-03"] <- "YES"
+
+cabinet_3$party.cmp[cabinet_3$party_name == "Partito Democratico" & cabinet_3$election_date == "2018-03-04"] <- 32440#party cmp was wrong
+
+cabinet_3$RILE[cabinet_3$party.cmp == 32440 & cabinet_3$election_date == "2018-03-04"] <- -8.275
+
+cabinet_3$per501[cabinet_3$party.cmp == 32440 & cabinet_3$election_date == "2018-03-04"] <- 3.201
+
+cabinet_3$Check[cabinet_3$party.cmp == 32440 & cabinet_3$election_date == "2018-03-04"] <- "YES"
+
+cabinet_3$party.cmp[cabinet_3$party_name == "Miflaga Datit Leumit (Mafdal) | Habayit Hayehudi"] <- 72701#party cmp was wrong
+
+cabinet_3$RILE[cabinet_3$party.cmp == 72701 & cabinet_3$election_date == "2009-02-10"] <- 33.048
+
+cabinet_3$per501[cabinet_3$party.cmp == 72701 & cabinet_3$election_date == "2009-02-10"] <- 1.425
+
+cabinet_3$Check[cabinet_3$party.cmp == 72701 & cabinet_3$election_date == "2009-02-10"] <- "YES"
+
+cabinet_3$RILE[cabinet_3$party.cmp == 72701 & cabinet_3$election_date == "2013-01-22"] <- 60.577
+
+cabinet_3$per501[cabinet_3$party.cmp == 72701 & cabinet_3$election_date == "2013-01-22"] <- 4.808
+
+cabinet_3$Check[cabinet_3$party.cmp == 72701 & cabinet_3$election_date == "2013-01-22"] <- "YES"
+
+cabinet_3$RILE[cabinet_3$party.cmp == 72701 & cabinet_3$election_date == "2015-03-17"] <- 38.776
+
+cabinet_3$per501[cabinet_3$party.cmp == 72701 & cabinet_3$election_date == "2015-03-17"] <- 5.102
+
+cabinet_3$Check[cabinet_3$party.cmp == 72701 & cabinet_3$election_date == "2015-03-17"] <- "YES"
+
+cabinet_3$party.cmp[cabinet_3$party_name == "HaMa'arakh | HaAvoda" & cabinet_3$election_date == "2020-03-02"] <- 72031#party cmp was wrong
+
+cabinet_3$RILE[cabinet_3$party.cmp == 72031 & cabinet_3$election_date == "2020-03-02"] <- -35
+
+cabinet_3$per501[cabinet_3$party.cmp == 72031 & cabinet_3$election_date == "2020-03-02"] <- 5.625
+
+cabinet_3$Check[cabinet_3$party.cmp == 72031 & cabinet_3$election_date == "2020-03-02"] <- "YES"
+
+cabinet_3$party.cmp[cabinet_3$party_name == "Slovenska demokratska stranka" & cabinet_3$election_date == "2011-12-04"] <- 97330#party cmp was wrong
+
+cabinet_3$RILE[cabinet_3$party.cmp == 97330 & cabinet_3$election_date == "2011-12-04"] <- 3.424
+
+cabinet_3$per501[cabinet_3$party.cmp == 97330 & cabinet_3$election_date == "2011-12-04"] <- 6.849
+
+cabinet_3$Check[cabinet_3$party.cmp == 97330 & cabinet_3$election_date == "2011-12-04"] <- "YES"
+
+cabinet_3$party.cmp[cabinet_3$party_name == "Slovenska demokratska stranka" & cabinet_3$election_date == "2018-06-03"] <- 97330#party cmp was wrong
+
+cabinet_3$RILE[cabinet_3$party.cmp == 97330 & cabinet_3$election_date == "2018-06-03"] <- 16.346
+
+cabinet_3$per501[cabinet_3$party.cmp == 97330 & cabinet_3$election_date == "2018-06-03"] <- 4.167
+
+cabinet_3$Check[cabinet_3$party.cmp == 97330 & cabinet_3$election_date == "2018-06-03"] <- "YES"
+
+cabinet_3$party.cmp[cabinet_3$party_name == "Écologistes Confédérés pour l'organisation de luttes originales" & cabinet_3$election_date == "2019-05-26"] <- 21112#party cmp was wrong
+
+cabinet_3$RILE[cabinet_3$party.cmp == 21112 & cabinet_3$election_date == "2019-05-26"] <- -21.849
+
+cabinet_3$per501[cabinet_3$party.cmp == 21112 & cabinet_3$election_date == "2019-05-26"] <- 8.048
+
+cabinet_3$Check[cabinet_3$party.cmp == 21112 & cabinet_3$election_date == "2019-05-26"] <- "YES"
+
+cabinet_3$party.cmp[cabinet_3$party_name == "Mouvement Réformateur" & cabinet_3$election_date == "2019-05-26"] <- 21421#party cmp was wrong
+
+cabinet_3$RILE[cabinet_3$party.cmp == 21421 & cabinet_3$election_date == "2019-05-26"] <- -8
+
+cabinet_3$per501[cabinet_3$party.cmp == 21421 & cabinet_3$election_date == "2019-05-26"] <- 2.494
+
+cabinet_3$Check[cabinet_3$party.cmp == 21421 & cabinet_3$election_date == "2019-05-26"] <- "YES"
+```
+```{r}
+##Further further changes
+cabinet_3$party.cmp[cabinet_3$party_name == "Združena lista – Socialni demokrati"] <- 97322#party cmp was wrong
+
+cabinet_3$RILE[cabinet_3$party.cmp == 97322 & cabinet_3$election_date == "2008-09-21"] <- -11.488
+
+cabinet_3$per501[cabinet_3$party.cmp == 97322 & cabinet_3$election_date == "2008-09-21"] <- 2.188
+
+cabinet_3$Check[cabinet_3$party.cmp == 97322 & cabinet_3$election_date == "2008-09-21"] <- "YES"
+
+cabinet_3$RILE[cabinet_3$party.cmp == 97322 & cabinet_3$election_date == "2011-12-04"] <- -1.058
+
+cabinet_3$per501[cabinet_3$party.cmp == 97322 & cabinet_3$election_date == "2011-12-04"] <- 5.385
+
+cabinet_3$Check[cabinet_3$party.cmp == 97322 & cabinet_3$election_date == "2011-12-04"] <- "YES"
+
+cabinet_3$RILE[cabinet_3$party.cmp == 97322 & cabinet_3$election_date == "2014-07-13"] <- -7.581
+
+cabinet_3$per501[cabinet_3$party.cmp == 97322 & cabinet_3$election_date == "2014-07-13"] <- 4.332
+
+cabinet_3$Check[cabinet_3$party.cmp == 97322 & cabinet_3$election_date == "2014-07-13"] <- "YES"
+
+cabinet_3$RILE[cabinet_3$party.cmp == 97322 & cabinet_3$election_date == "2018-06-03"] <- -10.124
+
+cabinet_3$per501[cabinet_3$party.cmp == 97322 & cabinet_3$election_date == "2018-06-03"] <- 3.099
+
+cabinet_3$Check[cabinet_3$party.cmp == 97322 & cabinet_3$election_date == "2018-06-03"] <- "YES"
+
+cabinet_3$party.cmp[cabinet_3$party_name == "Adalet ve Kalk?nma Partisi" & cabinet_3$election_date == "2018-06-24"] <- 74628#party cmp was wrong
+
+cabinet_3$RILE[cabinet_3$party.cmp == 74628 & cabinet_3$election_date == "2018-06-24"] <- -6.78
+
+cabinet_3$per501[cabinet_3$party.cmp == 74628 & cabinet_3$election_date == "2018-06-24"] <- 3.189
+
+cabinet_3$Check[cabinet_3$party.cmp == 74628 & cabinet_3$election_date == "2018-06-24"] <- "YES"
+
+cabinet_3$party.cmp[cabinet_3$party_name == "Demokraattinen Liitto – Demokratiska Förbundet | Vasemmistoliitto – Vänsterförbundet" & cabinet_3$election_date == "2011-04-17"] <- 14223#party cmp was wrong
+
+cabinet_3$RILE[cabinet_3$party.cmp == 14223 & cabinet_3$election_date == "2011-04-17"] <- -44.767
+
+cabinet_3$per501[cabinet_3$party.cmp == 14223 & cabinet_3$election_date == "2011-04-17"] <- 1.163
+
+cabinet_3$Check[cabinet_3$party.cmp == 14223 & cabinet_3$election_date == "2011-04-17"] <- "YES"
+
+cabinet_3$party.cmp[cabinet_3$party_name == "Demokraattinen Liitto – Demokratiska Förbundet | Vasemmistoliitto – Vänsterförbundet" & cabinet_3$election_date == "2019-04-14"] <- 14223#party cmp was wrong
+
+cabinet_3$RILE[cabinet_3$party.cmp == 14223 & cabinet_3$election_date == "2019-04-14"] <- -41.021
+
+cabinet_3$per501[cabinet_3$party.cmp == 14223 & cabinet_3$election_date == "2019-04-14"] <- 12.676
+
+cabinet_3$Check[cabinet_3$party.cmp == 14223 & cabinet_3$election_date == "2019-04-14"] <- "YES"
+```
+```{r}
+##Still going
+cabinet_3$RILE[cabinet_3$party.cmp == 14223 & cabinet_3$election_date == "2011-04-17"] <- -44.767
+
+cabinet_3$per501[cabinet_3$party.cmp == 14223 & cabinet_3$election_date == "2011-04-17"] <- 1.163
+
+cabinet_3$Check[cabinet_3$party.cmp == 14223 & cabinet_3$election_date == "2011-04-17"] <- "YES"
+
+cabinet_3$RILE[cabinet_3$party.cmp == 14223 & cabinet_3$election_date == "2019-04-14"] <- -41.021
+
+cabinet_3$per501[cabinet_3$party.cmp == 14223 & cabinet_3$election_date == "2019-04-14"] <- 12.676
+
+cabinet_3$Check[cabinet_3$party.cmp == 14223 & cabinet_3$election_date == "2019-04-14"] <- "YES"
+
+cabinet_3$party.cmp[cabinet_3$party_name == "Parti radical de gauche" & cabinet_3$election_date == "2017-06-18"] <- 31230#party cmp was wrong
+
+cabinet_3$RILE[cabinet_3$party.cmp == 31230 & cabinet_3$election_date == "2017-06-18"] <- -10.056
+
+cabinet_3$per501[cabinet_3$party.cmp == 31230 & cabinet_3$election_date == "2017-06-18"] <- 2.98
+
+cabinet_3$Check[cabinet_3$party.cmp == 31230 & cabinet_3$election_date == "2017-06-18"] <- "YES"
+
+cabinet_3$party.cmp[cabinet_3$party_name == "Bürgerlich–Demokratische Partei (BDP) Graubünden" & cabinet_3$election_date == "2007-10-21"] <- 43810#party cmp was wrong
+
+cabinet_3$RILE[cabinet_3$party.cmp == 43810 & cabinet_3$election_date == "2007-10-21"] <- 43.113
+
+cabinet_3$per501[cabinet_3$party.cmp == 43810 & cabinet_3$election_date == "2007-10-21"] <- 1.792
+
+cabinet_3$Check[cabinet_3$party.cmp == 43810 & cabinet_3$election_date == "2007-10-21"] <- "YES"
+```
+
+```{r}
+##Dataframe of missing values
+Party <- c(cabinet_3$party_name[cabinet_3$Check == "NO"])
+EDate <- c(cabinet_3$election_date[cabinet_3$Check == "NO"])
+CMP <- c(cabinet_3$party.cmp[cabinet_3$Check == "NO"])
+Country <- c(cabinet_3$country_name[cabinet_3$Check == "NO"])
+Seats <- c(cabinet_3$seats[cabinet_3$Check == "NO"])
+missing_man <- data.frame(Party, EDate, CMP, Country, Seats)
+```
+
+```{r}
+missing_man <- na.omit(missing_man)#removing NAs as those come from missing cmp values
+missing_man <- missing_man[missing_man$Seats > 0,]#removing parties with no seats
+```
+
+
+```{r}
+length(unique(missing_man$CMP))
+length(unique(missing_man$Country))
+```
+
+```{r}
+demokraattinen <- cabinet_3$party_name[148]
+```
+```{r}
+##Finding values for Finland, USA and Slovakia
+cabinet_3$party.cmp[cabinet_3$party_name == demokraattinen] <- 14223#party cmp was wrong
+
+cabinet_3$RILE[cabinet_3$party.cmp == 14223 & cabinet_3$election_date == "2011-04-17"] <- -44.767
+
+cabinet_3$per501[cabinet_3$party.cmp == 14223 & cabinet_3$election_date == "2011-04-17"] <- 3.488
+
+cabinet_3$Check[cabinet_3$party.cmp == 14223 & cabinet_3$election_date == "2011-04-17"] <- "YES"
+
+cabinet_3$RILE[cabinet_3$party.cmp == 14223 & cabinet_3$election_date == "2019-04-14"] <- -41.021
+
+cabinet_3$per501[cabinet_3$party.cmp == 14223 & cabinet_3$election_date == "2019-04-14"] <- 12.676
+
+cabinet_3$Check[cabinet_3$party.cmp == 14223 & cabinet_3$election_date == "2019-04-14"] <- "YES"
+
+cabinet_3$RILE[cabinet_3$party.cmp == 113630 & cabinet_3$election_date == "2007-12-09"] <- -2.74#Grand National Party, Korea
+
+cabinet_3$per501[cabinet_3$party.cmp == 113630 & cabinet_3$election_date == "2007-12-09"] <- 4
+
+cabinet_3$Check[cabinet_3$party.cmp == 113630 & cabinet_3$election_date == "2007-12-09"] <- "YES"
+
+cabinet_3$RILE[cabinet_3$party.cmp == 61320 & cabinet_3$election_date == "2008-11-04"] <- 11.14
+
+cabinet_3$per501[cabinet_3$party.cmp == 61320 & cabinet_3$election_date == "2008-11-04"] <- 4.64
+
+cabinet_3$Check[cabinet_3$party.cmp == 61320 & cabinet_3$election_date == "2008-11-04"] <- "YES"
+
+cabinet_3$RILE[cabinet_3$party.cmp == 61320 & cabinet_3$election_date == "2012-11-06"] <- -6.442
+
+cabinet_3$per501[cabinet_3$party.cmp == 61320 & cabinet_3$election_date == "2012-11-06"] <- 2.709
+
+cabinet_3$Check[cabinet_3$party.cmp == 61320 & cabinet_3$election_date == "2012-11-06"] <- "YES"
+
+cabinet_3$RILE[cabinet_3$party.cmp == 61620 & cabinet_3$election_date == "2016-11-08"] <- 32.969
+
+cabinet_3$per501[cabinet_3$party.cmp == 61620 & cabinet_3$election_date == "2016-11-08"] <- 1.186
+
+cabinet_3$Check[cabinet_3$party.cmp == 61620 & cabinet_3$election_date == "2016-11-08"] <- "YES"
+
+```
+
+```{r}
+##Civic list
+cabinet_3$party.cmp[cabinet_3$party_name == "Državljanska lista" & cabinet_3$election_date == "2011-12-04"] <- 97450#party cmp was wrong
+
+cabinet_3$RILE[cabinet_3$party.cmp == 97450 & cabinet_3$election_date == "2011-12-04"] <- 0
+
+cabinet_3$per501[cabinet_3$party.cmp == 97450 & cabinet_3$election_date == "2011-12-04"] <- 1.515
+
+cabinet_3$Check[cabinet_3$party.cmp == 97450 & cabinet_3$election_date == "2011-12-04"] <- "YES"
+```
+
+```{r}
+##Checking missing values again
+Party <- c(cabinet_3$party_name[cabinet_3$Check == "NO"])
+EDate <- c(cabinet_3$election_date[cabinet_3$Check == "NO"])
+CMP <- c(cabinet_3$party.cmp[cabinet_3$Check == "NO"])
+Country <- c(cabinet_3$country_name[cabinet_3$Check == "NO"])
+Seats <- c(cabinet_3$seats[cabinet_3$Check == "NO"])
+missing_man_2 <- data.frame(Party, EDate, CMP, Country, Seats)
+```
+```{r}
+missing_man_2 <- na.omit(missing_man)#removing NAs as those come from missing cmp values
+missing_man_2 <- missing_man[missing_man$Seats > 0,]#removing parties with no seats
+```
+
+##Saving dataset (in case anything goes wrong)
+```{r}
+write.csv(cabinet_3, "C:/Users/maxsk/Documents/UCL/Year 3/Dissertation/Data/cabinet_3_1.csv")
+```
+
+At the end of our data cleaning we have missing values for 16 parties across 8 different countries. Two observations are parties missing in recorded elections in manifesto. This includes Parti Socialiste, which was not actually a cabinet party in 2019 but supporting the government from opposition. United Torah Judaism was a cabinet party in 2015 for this Israeli government, but the smallest party only counting 5 seats. It is, therefore, largely unproblematic that these observations are missing. 
+
+However, 14 come from new elections in 2019 and 2020 not recorded in the manifesto database. These include Australia, Canada, Greece, Ireland, Luxembourg and Slovakia. 
+
+##Single RILE and per501 score
+
+Given the individual party scores, I now want to aggregate scores into a total score for the cabinet and therefore government. To do this I will weight each party's score by the number of seats they have in the legislature. According to Gamsons law, this will translate into a party's representation in government and thereby their influence on policy. I will then aggregate weighted scores into a total score for each cabinet.
+
+
+```{r}
+##Party weights
+cabinet_3$weighted <- cabinet_3$seats/cabinet_3$election_seats_total
+```
+```{r}
+library(dplyr)
+```
+
+```{r}
+cabinet_3 <- cabinet_3 %>% relocate(weighted, .after=election_seats_total)#moving column
+```
+```{r}
+##Creating weighted columns
+cabinet_3$w_RILE <- cabinet_3$weighted * cabinet_3$RILE
+
+cabinet_3$w_per501 <- cabinet_3$weighted * cabinet_3$per501
+```
+```{r}
+##Resorting rows
+cabinet_3 <- cabinet_3 %>% arrange(country_name_short, start_date)
+```
+
+```{r}
+##Empty column for government scores
+cabinet_3$gov_RILE <- 0
+cabinet_3$gov_per501 <- 0
+```
+
+```{r}
+##Creating aggregated government RILE score
+cab <- "Gillard II"
+score <- 0
+for (i in 1:nrow(cabinet_3)){
+  if(cab != cabinet_3$cabinet_name[i]){
+      cabinet_3$gov_RILE[cabinet_3$cabinet_name == cab] <- score
+      print(paste(cab, " is complete"))
+      score <- 0
+      cab <- cabinet_3$cabinet_name[i]
+  }
+  if(cab == cabinet_3$cabinet_name[i]){
+      score <- score + cabinet_3$w_RILE[i]
+  }
+  if(i == nrow(cabinet_3)){
+    cabinet_3$gov_RILE[cabinet_3$cabinet_name == cab] <- score
+      print(paste(cab, " is complete"))
+  }
+}
+```
+```{r}
+##Checking missing values
+print(cabinet_3$cabinet_name[cabinet_3$gov_RILE == 0])
+print(cabinet_3$country_name[cabinet_3$gov_RILE == 0])
+print(cabinet_3$election_date[cabinet_3$gov_RILE == 0])
+```
+From this, we can see our government RILE score has been aggregated successfully. The only values of 0 are those from the missing observations. Values of NA are parties with no seats in the legislature and therefore not part of cabinet.
+
+```{r}
+##Environmental scores
+cab <- "Gillard II"
+score <- 0
+for (i in 1:nrow(cabinet_3)){
+  if(cab != cabinet_3$cabinet_name[i]){
+      cabinet_3$gov_per501[cabinet_3$cabinet_name == cab] <- score
+      print(paste(cab, " is complete"))
+      score <- 0
+      cab <- cabinet_3$cabinet_name[i]
+  }
+  if(cab == cabinet_3$cabinet_name[i]){
+      score <- score + cabinet_3$w_per501[i]
+  }
+  if(i == nrow(cabinet_3)){
+    cabinet_3$gov_per501[cabinet_3$cabinet_name == cab] <- score
+      print(paste(cab, " is complete"))
+  }
+}
+```
+##Saving dataset (in case anything goes wrong)
+```{r}
+write.csv(cabinet_3, "C:/Users/maxsk/Documents/UCL/Year 3/Dissertation/Data/cabinet_3_3.csv")
+```
+
+##Exceptions
+Checks have revealed some exceptions which we may wish to take account of.
+
+Firstly, there are several caretaker governments which have no RILE score as they are not a party but independent, yet will thereby return a value of NA as they do not occupy any seats in the legislature. 
+
+Secondly, when small parties have missing values they cause the whole cabinet to return NA values, even though their actual influence may be minimal.
+
+I propose two solutions to these problems. Firstly, to give independents as centrists with a RILE score of 0. Secondly, to impose a minimum cut-off for missing values for small parties. If they are below, say, 5% of seats in the legislature their missing value should be ignored, as they have very little influence over cabinet policy. This will avoid certain missing values for uninfluential parties creating missing values for entire governments.
+
+```{r}
+##Small parties missing values
+for (i in 1:nrow(cabinet_3)){
+  if(cabinet_3$weighted[i] < 0.05 & is.na(cabinet_3$RILE[i]) == TRUE){
+    cabinet_3$RILE[i] <- 0
+    cabinet_3$w_RILE[i] <- 0
+  }
+  if(cabinet_3$weighted[i] < 0.05 & is.na(cabinet_3$per501[i]) == TRUE){
+    cabinet_3$per501[i] <- 0
+    cabinet_3$w_per501[i] <- 0
+  }
+}
+
+```
+##NOTE after this change we have to run the scoring again
+
+```{r}
+##Creating aggregated government RILE score
+cab <- "Gillard II"
+score <- 0
+for (i in 1:nrow(cabinet_3)){
+  if(cab != cabinet_3$cabinet_name[i]){
+      cabinet_3$gov_RILE[cabinet_3$cabinet_name == cab] <- score
+      print(paste(cab, " is complete"))
+      score <- 0
+      cab <- cabinet_3$cabinet_name[i]
+  }
+  if(cab == cabinet_3$cabinet_name[i]){
+      score <- score + cabinet_3$w_RILE[i]
+  }
+  if(i == nrow(cabinet_3)){
+    cabinet_3$gov_RILE[cabinet_3$cabinet_name == cab] <- score
+      print(paste(cab, " is complete"))
+  }
+}
+```
+```{r}
+##Environmental scores
+cab <- "Gillard II"
+score <- 0
+for (i in 1:nrow(cabinet_3)){
+  if(cab != cabinet_3$cabinet_name[i]){
+      cabinet_3$gov_per501[cabinet_3$cabinet_name == cab] <- score
+      print(paste(cab, " is complete"))
+      score <- 0
+      cab <- cabinet_3$cabinet_name[i]
+  }
+  if(cab == cabinet_3$cabinet_name[i]){
+      score <- score + cabinet_3$w_per501[i]
+  }
+  if(i == nrow(cabinet_3)){
+    cabinet_3$gov_per501[cabinet_3$cabinet_name == cab] <- score
+      print(paste(cab, " is complete"))
+  }
+}
+```
+#As RILE and per501 scores can actually take a value of 0, we should differentiate from missing data scoring zero and actual zero scores:
+
+```{r}
+##Independents
+cabinet_3$party_name_short[cabinet_3$cabinet_name == "Kyo-ahn"] <- "none"
+cabinet_3$Check[cabinet_3$cabinet_name == "Kyo-ahn"] <- "YES"
+cabinet_3$gov_RILE[cabinet_3$party_name_short == "none"] <- 0
+```
+```{r}
+##Changing scores if 0 and not verified
+cabinet_3$gov_RILE[cabinet_3$gov_RILE == 0 & cabinet_3$Check == "NO"] <- NA
+cabinet_3$gov_per501[cabinet_3$gov_per501 == 0 & cabinet_3$Check == "NO"] <- NA
+```
+```{r}
+##Missing dataframe
+Govern <- c(cabinet_3$cabinet_name[is.na(cabinet_3$gov_RILE) == TRUE])
+count <- c(cabinet_3$country_name[is.na(cabinet_3$gov_RILE) == TRUE])
+dat <- c(cabinet_3$election_date[is.na(cabinet_3$gov_RILE) == TRUE])
+
+miss_check <- data.frame(Govern, count, dat)
+miss_check <- unique(miss_check)
+
+length(1:nrow(miss_check))
+```
+```{r}
+length(unique(cabinet_3$cabinet_name[is.na(cabinet_3$gov_RILE)==TRUE]))
+```
+Missingness of Vals III, Monte, Conte I and Conte II present an issue:
+
+```{r}
+##Fixing missingness of these values
+
+```
+
+
+The only missing values are those whose RILE manifesto does not record, as identified earlier.  In total, this is 13 different governments.
+
+```{r}
+##Saving
+cabinet_4 <- cabinet_3
+```
+
+##Saving dataset (in case anything goes wrong)
+```{r}
+write.csv(cabinet_4, "C:/Users/maxsk/Documents/UCL/Year 3/Dissertation/Data/cabinet_4.csv")
+```
+##Adding other independent variables
+
+I have three other independent variables which I wish to examine pertaining to political ideology. They are:
+
+1. Left or right dummy variable
+2. Green party member of government (categorical variable)
+3. Green development minister (categorical variable)
+
+Firstly, let's make the simple right-left dummy. We will use RILE scores to calculate this, because the left-right parlgov measure does not match the RILE score in all cases.
+
+```{r}
+##Using the RILE score, we assign either 'left' or 'right'
+cabinet_4$left_dummy <- 0
+
+cabinet_4$left_dummy[cabinet_4$gov_RILE > 0] <- 0#right wing governments 0
+
+cabinet_4$left_dummy[cabinet_4$gov_RILE < 0] <- 1#left wing governments 1
+
+cabinet_4$left_dummy[cabinet_4$gov_RILE == 0] <- NA#independent governments NA
+
+cabinet_4$left_dummy[is.na(cabinet_4$gov_RILE) == TRUE] <- NA#missing values NA
+```
+```{r}
+##Green party cabinet member
+cabinet_4$parfam <- 0
+
+#Retrieving parfam values from manifesto database
+for (i in 1:nrow(cabinet_4)){
+  x <- cabinet_4$party.cmp[i]
+  z <- unique(manifesto$parfam[manifesto$party == x])
+  if(length(z) != 0){
+    cabinet_4$parfam[i] <- z
+  }
+}
+```
+```{r}
+##Overwriting missing values
+cabinet_4$parfam[is.na(cabinet_4$parfam == TRUE)] <- 0
+```
+
+```{r}
+##Creating green party score
+cabinet_4$green_party <- 0
+```
+```{r}
+##Creating green party score
+cab <- "Gillard II"
+score <- 0
+for (i in 1:nrow(cabinet_4)){
+  if(cab != cabinet_4$cabinet_name[i]){
+      cabinet_4$green_party[cabinet_4$cabinet_name == cab] <- score
+      print(paste(cab, " is complete"))
+      score <- 0
+      cab <- cabinet_4$cabinet_name[i]
+  }
+  if(cab == cabinet_4$cabinet_name[i]){
+    if(cabinet_4$parfam[i] == 10){#10 is parfam of ecological parties
+      score <- 1
+    }
+      
+  }
+  if(i == nrow(cabinet_4)){
+    cabinet_4$green_party[cabinet_4$cabinet_name == cab] <- score
+      print(paste(cab, " is complete"))
+  }
+}
+```
+```{r}
+print(unique(cabinet_4$cabinet_name[cabinet_4$green_party == 1]))
+```
+There are 17 cabinets in our sample which have green parties as members.
+
+##Saving dataset (in case anything goes wrong)
+```{r}
+write.csv(cabinet_4, "C:/Users/maxsk/Documents/UCL/Year 3/Dissertation/Data/cabinet_4_1.csv")
+```
+
+##Creating government key
+
+```{r}
+##Only taking unique cabinets and scores
+government_key <- cabinet_4
+
+government_key <- government_key[!duplicated(government_key$cabinet_name),]
+```
+```{r}
+##Only keeping relevant columns
+government_key <- subset(government_key, select = c("country_name_short", "country_name", "election_date", "start_date", "cabinet_name", "gov_RILE", "gov_per501", "left_dummy", "green_party"))
+```
+
+```{r}
+##How many cabinets in same year
+library(lubridate)
+
+government_key$lagged_year <- as.Date(government_key$start_date)
+
+government_key$lagged_year <- floor_date(government_key$lagged_year, unit = "year")
+
+government_key$lagged_year <- government_key$lagged_year %m+% years(1)#time lag
+
+government_key$lagged_year <- format(government_key$lagged_year, format="%Y")
+```
+
+Due to the lagging, some cabinets now have start dates in 2021 which we can remove.
+
+```{r}
+##Removing 2021 start dates
+government_key <- government_key[government_key$lagged_year != 2021,]
+```
+
+```{r}
+##Removing Swiss cabinet which should not be in sample
+government_key <- government_key[government_key$cabinet_name != "Bundesrat 2008",]
+```
+
+```{r}
+##Counting cabinets
+j <- 1
+cabinet_overlap <- c()
+cab_date <- c()
+for (i in 1:nrow(government_key)){
+  if(government_key$cabinet_name[i] != government_key$cabinet_name[j] & government_key$lagged_year[i] == government_key$lagged_year[j]){
+    itm <- government_key$cabinet_name[j]
+    yr <- government_key$start_date[j]
+    cabinet_overlap <- c(cabinet_overlap,itm)
+    cab_date <- c(cab_date, yr)
+  }
+  j <- i
+}
+```
+
+```{r}
+##Checks
+time_lap <- data.frame(cabinet_overlap, cab_date)
+```
+27 cabinets have overlapping start years. I will have to decide a rule on how to measure these. 
+
+```{r}
+write.csv(time_lap, "C:/Users/maxsk/Documents/UCL/Year 3/Dissertation/Data/overlap_check.csv")
+```
+
+##Correcting overlapping dates
+
+```{r}
+##First a quick fix for Obama's start date
+government_key$start_date[government_key$cabinet_name == "Obama I"] <- "2008-01-01"
+```
+
+```{r}
+##We need to create a date format column for coding dates at a later stage
+government_key$lagged_date <- as.Date(government_key$start_date)
+
+government_key$lagged_date <- floor_date(government_key$lagged_date, unit = "year")
+
+government_key$lagged_date <- government_key$lagged_date %m+% years(1)#time lag
+```
+
+```{r}
+##Using new dataframe for correcting errors
+government_key_2 <- government_key
+```
+
+See excel file for justifications behind overlap decisions:
+
+```{r}
+##Removing overlaps
+cabinet_remove <- c("Rudd II", "Bierlein I", "Di Rupo II", "Michel III", "Rajoy III", "Stubb I", "Stubb II", "Marin", "Ayrault I", "Valls I", "Cazeneuve", "Philippe I", "Johnson II", "Pikramenos", "Tsipras I", "Mitsotakis Kyr", "Letta II", "Rutte II", "Rutte IV", "Passos Coelho II", "Kyo-ahn", "Fico III", "Davutoglu II")
+
+for (i in cabinet_remove){
+  government_key_2 <- government_key_2[government_key_2$cabinet_name != i,] 
+}
+
+```
+
+```{r}
+##Moving certain cabinets to next year
+government_key_2$lagged_date[government_key_2$cabinet_name == "Jakobsdottir I"] <-government_key_2$lagged_date[government_key_2$cabinet_name == "Jakobsdottir I"] %m+% years(1)#time lag
+
+government_key_2$lagged_year[government_key_2$cabinet_name == "Jakobsdottir I"] <- "2019"
+
+government_key_2$lagged_date[government_key_2$cabinet_name == "Bettel I"] <-government_key_2$lagged_date[government_key_2$cabinet_name == "Bettel I"] %m+% years(1)#time lag
+
+government_key_2$lagged_year[government_key_2$cabinet_name == "Bettel I"] <- "2015"
+```
+
+```{r}
+##Final check that there are no more overlapping cabinets
+##Counting cabinets
+j <- 1
+cabinet_overlap <- c()
+cab_date <- c()
+for (i in 1:nrow(government_key_2)){
+  if(government_key_2$cabinet_name[i] != government_key_2$cabinet_name[j] & government_key_2$lagged_year[i] == government_key_2$lagged_year[j]){
+    itm <- government_key_2$cabinet_name[j]
+    yr <- government_key_2$start_date[j]
+    cabinet_overlap <- c(cabinet_overlap,itm)
+    cab_date <- c(cab_date, yr)
+  }
+  j <- i
+}
+
+print(cabinet_overlap)
+```
+
+```{r}
+##Adjusting lagged year and date on Obama I
+government_key_2$lagged_year[government_key_2$cabinet_name == "Obama I"] <- "2009"
+```
+
+
+##Finalising date coding
+
+Now we need to duplicate rows for each year a cabinet governs between administration start dates before we merge the key with the OECD dataset.
+
+```{r}
+##Using new dataframe
+government_key_3 <- government_key_2
+```
+
+```{r}
+##Changing all start dates before 2012 to 2012
+government_key_3$lagged_date[government_key_3$lagged_year < 2012] <- as.Date("2012-01-01")
+
+government_key_3$lagged_year[government_key_3$lagged_year < 2012] <- 2012
+```
+
+```{r}
+difference <- c()
+j <- 0
+for (i in 1:nrow(government_key_3)){
+  diff <- as.numeric(government_key_3$lagged_year[i]) - as.numeric(government_key_3$lagged_year[j])
+j <- i
+difference <- c(difference, diff)
+}
+
+max(unlist(difference))
+```
+
+The biggest year difference is 6.
+
+```{r}
+##Looping to replicate rows
+library(tibble)
+government_key_4 <- government_key_3
+government_key_4 <- government_key_4[0,]
+j <- 1
+val <- 0
+for (i in 1:nrow(government_key_3)){
+  if(i != j){
+    if(as.numeric(government_key_3$lagged_year[i]) - as.numeric(government_key_3$lagged_year[j]) < 0){
+      val <- 2020 - as.numeric(government_key_3$lagged_year[j])
+      if(val == 0){
+        government_key_4 <- government_key_4 %>% add_row(government_key_3[j,])
+      }
+      if(val == 1){
+          government_key_4 <- government_key_4 %>% add_row(government_key_3[j,])
+          government_key_4 <- government_key_4 %>% add_row(government_key_3[j,])
+
+      }
+      if(val == 2){
+        government_key_4 <- government_key_4 %>% add_row(government_key_3[j,])
+        government_key_4 <- government_key_4 %>% add_row(government_key_3[j,])
+        government_key_4 <- government_key_4 %>% add_row(government_key_3[j,])
+      }
+            
+        }
+        
+    
+    if(as.numeric(government_key_3$lagged_year[i]) - as.numeric(government_key_3$lagged_year[j]) == 1){
+      government_key_4 <- government_key_4 %>% add_row(government_key_3[j,])
+    }
+    
+    
+    if(as.numeric(government_key_3$lagged_year[i]) - as.numeric(government_key_3$lagged_year[j]) == 2){
+      government_key_4 <- government_key_4 %>% add_row(government_key_3[j,])
+      government_key_4 <- government_key_4 %>% add_row(government_key_3[j,])
+    } 
+    
+    if(as.numeric(government_key_3$lagged_year[i]) - as.numeric(government_key_3$lagged_year[j]) == 3){
+      government_key_4 <- government_key_4 %>% add_row(government_key_3[j,])
+      government_key_4 <- government_key_4 %>% add_row(government_key_3[j,])
+      government_key_4 <- government_key_4 %>% add_row(government_key_3[j,])
+    }
+    if(as.numeric(government_key_3$lagged_year[i]) - as.numeric(government_key_3$lagged_year[j]) == 4){
+      government_key_4 <- government_key_4 %>% add_row(government_key_3[j,])
+      government_key_4 <- government_key_4 %>% add_row(government_key_3[j,])
+      government_key_4 <- government_key_4 %>% add_row(government_key_3[j,])
+      government_key_4 <- government_key_4 %>% add_row(government_key_3[j,])
+    }
+    if(as.numeric(government_key_3$lagged_year[i]) - as.numeric(government_key_3$lagged_year[j]) == 5){
+      government_key_4 <- government_key_4 %>% add_row(government_key_3[j,])
+      government_key_4 <- government_key_4 %>% add_row(government_key_3[j,])
+      government_key_4 <- government_key_4 %>% add_row(government_key_3[j,])
+      government_key_4 <- government_key_4 %>% add_row(government_key_3[j,])
+      government_key_4 <- government_key_4 %>% add_row(government_key_3[j,])
+    }
+    if(as.numeric(government_key_3$lagged_year[i]) - as.numeric(government_key_3$lagged_year[j]) == 6){
+      government_key_4 <- government_key_4 %>% add_row(government_key_3[j,])
+      government_key_4 <- government_key_4 %>% add_row(government_key_3[j,])
+      government_key_4 <- government_key_4 %>% add_row(government_key_3[j,])
+      government_key_4 <- government_key_4 %>% add_row(government_key_3[j,])
+      government_key_4 <- government_key_4 %>% add_row(government_key_3[j,])
+      government_key_4 <- government_key_4 %>% add_row(government_key_3[j,])
+    }
+  }  
+j <- i
+
+if(i == nrow(government_key_3)){
+  government_key_4 <- government_key_4 %>% add_row(government_key_3[i,])
+  government_key_4 <- government_key_4 %>% add_row(government_key_3[i,])
+  government_key_4 <- government_key_4 %>% add_row(government_key_3[i,])
+}
+}
+```
+
+```{r}
+##Converting lagged_year into numeric values for looping dates
+government_key_4$lagged_year <- as.numeric(government_key_4$lagged_year)
+print(government_key_4$lagged_year[1])
+```
+
+```{r}
+##Writing in dates for duplicate rows
+j <- 1
+for (i in 1:nrow(government_key_4)){
+  if(i != j){
+    if(government_key_4$cabinet_name[i] == government_key_4$cabinet_name[j]){
+      government_key_4$lagged_year[i] <- government_key_4$lagged_year[j] + 1
+    }
+    j <- i
+  }
+}
+```
+
+```{r}
+##Removing lagged date and adding start year to make less confusing
+government_key_4$start_year <- government_key_4$lagged_year - 1
+
+government_key_4 <- government_key_4[,-11]
+```
+
+##Saving before something goes wrong
+```{r}
+write.csv(government_key_4, "C:/Users/maxsk/Documents/UCL/Year 3/Dissertation/Data/government_key_4.csv")
+```
